@@ -1,0 +1,71 @@
+{
+  "name": "ul-context-inspector",
+  "version": "0.1.0",
+  "description": "React UI component to inspect context data exposed on the window object.",
+  "keywords": [
+    "react",
+    "inspector",
+    "context",
+    "window",
+    "debug",
+    "vite",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/ul-context-inspector.cjs.js",
+  "module": "dist/ul-context-inspector.es.js",
+  "types": "dist/types/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/ul-context-inspector.es.js",
+      "require": "./dist/ul-context-inspector.cjs.cjs",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && ls -1 dist",
+    "watch": "vite build --watch",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "typecheck": "tsc --noEmit",
+    "preview": "vite preview",
+    "clean": "rimraf dist"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vitejs/plugin-react": "^4.2.0",
+  "@tailwindcss/postcss": "^4.0.0",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.6",
+    "postcss": "^8.4.40",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "rimraf": "^5.0.5",
+  "tailwindcss": "^3.4.14",
+    "typescript": "^5.4.0",
+    "vite": "^5.0.0",
+    "vite-plugin-dts": "^3.7.3"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": false
+    },
+    "react-dom": {
+      "optional": false
+    }
+  }
+}
