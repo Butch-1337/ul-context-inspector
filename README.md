@@ -1,16 +1,19 @@
 
 ## ul-context-inspector
 
-React + TypeScript UI component that mounts developer panels for inspecting and editing a JSON context object exposed on `window` (notably `window.universal_login_context`). Designed for embedding into Universal Login / auth-related integration surfaces for faster iteration without constant console spelunking.
+Developer panel for inspecting & editing an Auth0 Universal Login JSON context (`window.universal_login_context`). Built with React + TypeScript, shipped as a small library (Vite). Drop it into any Universal Login or similar environment to iterate on screen variants quickly.
 
 ### Core Features
-* Left-side sliding panel (`UniversalLoginContextPanel`) to view & edit `window.universal_login_context` when truly connected.
-* Disconnected preview mode: load local or CDN manifest, pick screen + variant, preview JSON without mutating global state until allowed.
-* JSON editor with syntax highlighting (Prism) + line numbers, search line filtering, copy & download.
-* Tailwind (scoped with `uci-` prefix; no global preflight), dark theme first.
-* Debounced safe JSON parsing & validity indicator.
+* Sliding left panel (`<UniversalLoginContextPanel />`) editing `window.universal_login_context` when a context already exists ("connected" mode).
+* Disconnected preview mode: fetch a manifest (local or CDN), choose screen + variant, preview JSON without mutating global context unless in explicit local mode.
+* Automatic screen & variant population from manifest (path + variants array); fallback variant list if manifest missing.
+* Prism syntax highlighted JSON editor with line numbers, search line filtering (line subset view), validity border state, copy & download actions.
+* Download naming: `${variant}-${screen}-context.json` (screen uses `topKey-childKey` format; sanitized).
+* Tailwind classes namespaced with `uci-` (no global resets), dark theme base.
+* Debounced (400ms) JSON parse + apply with apply suppression during preview.
+* Strict separation between original tenant context and local preview to avoid accidental promotion.
 
-Planned: test coverage expansion, accessibility polish, optional diffing, theming tokens, keyboard shortcuts, manifest caching.
+Planned: manifest caching, explicit "promote preview" action, keyboard shortcuts, theming tokens, a11y polish, diff visualization, higher test coverage.
 
 ### Install
 ```
@@ -28,23 +31,40 @@ export function App() {
 }
 ```
 
-### Props
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `targetKey` | `string` | `"ulContext"` | Property on `window` (or custom `root`) to inspect. |
-| `defaultOpen` | `boolean` | `false` | Whether the panel starts open. |
-| `pollInterval` | `number` | `3000` | Milliseconds between snapshots. Set `0` to disable polling (manual refresh TBD). |
-| `root` | `any` | `window` | Override global object (useful for testing). |
-| `height` | `number | string` | `300` | Panel height when open. |
+### Component Props (selected)
+| Prop | Type | Default | Notes |
+| ---- | ---- | ------- | ----- |
+| `defaultOpen` | boolean | false | Open panel on mount. |
+| `width` | number \| string | 560 | Width of sliding panel. |
+| `screenLabel` | string | "Current Screen" | Placeholder label if no manifest. |
+| `dataSources` | string[] | ["Auth0 CDN","Local development"] | Populates data source select. Any value containing "local" enables local mode (no version select, writes allowed). |
+| `variants` | string[] | ["default"] | Fallback variant array if manifest absent or missing variants. |
+| `defaultVariant` | string | first of variants | Initial variant. |
+| `defaultDataSource` | string | first of dataSources | Initial data source. |
+| `defaultVersion` | string | first of versions | Initial version (hidden in local mode). |
+| `onVariantChange` | (v: string) => void | — | Callback on variant change. |
+| `onDataSourceChange` | (v: string) => void | — | Callback on data source change. |
+| `onVersionChange` | (v: string) => void | — | Callback on version change. |
 
-### UniversalLoginContextPanel Props (extract)
-| Prop | Type | Default | Description |
-| ---- | ---- | ------- | ----------- |
-| `defaultOpen` | boolean | false | Start opened on mount. |
-| `width` | number \| string | 560 | Panel width. |
-| `screenLabel` | string | "Current Screen" | Label for screen select. |
-| `dataSources` | string[] | ["Auth0 CDN","Local development"] | Source options. |
-| `variants` | string[] | ["default"] | Fallback variants if manifest missing. |
+Other internal hooks (e.g., `useUlManifest`, `useWindowJsonContext`) are currently internal and not exported.
+
+### Manifest Structure (simplified)
+```
+{
+	"screens": [
+		{ "login": { "login": { "path": "/screens/login/login", "variants": ["default","enterprise"] } } },
+		{ "signup": { "signup": { "path": "/screens/signup/signup", "variants": ["default"] } } }
+	],
+	"versions": ["1.0.0"]
+}
+```
+Each entry is a single top-level key containing an object whose key is the child screen; a variant node may define `path` (base directory) and `variants` array.
+
+### Connected vs Preview Logic
+* If `window.universal_login_context` exists on mount → connected (edits persist).
+* Otherwise → disconnected preview. Loading screen + variant only fills editor buffer.
+* Local mode (dataSource includes `local`) permits applying edits to create/promote the context.
+* Future enhancement: explicit button to promote preview without relying on data source heuristic.
 
 
 ### Local Development

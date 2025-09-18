@@ -92,7 +92,7 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
     debounceMs: 400,
     autoSyncOnActive: true,
     // Allow writes only if we started connected OR explicitly in local mode.
-    applyEnabled: initialHadContextRef.current || dataSource.toLowerCase() === 'local'
+  applyEnabled: initialHadContextRef.current || dataSource.toLowerCase().includes('local')
   });
   const [searchVisible, setSearchVisible] = useState(false);
   const [search, setSearch] = useState("");
@@ -163,7 +163,6 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
 
   const onDownload = useCallback(() => {
     try {
-      // Interpret current variant as the requested "prompt" identifier for naming.
       const screenPart = (selectedScreen || 'screen').replace(/:/g, '-');
       const safe = (s: string) => s.toLowerCase().replace(/[^a-z0-9-_]+/g, '-').replace(/^-+|-+$/g, '') || 'context';
       const fileName = `${safe(screenPart)}-context.json`;
@@ -232,7 +231,7 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
   {/* Screen selection (populated via manifest) */}
       <div className="uci-px-5 uci-py-3 uci-border-b uci-border-gray-800">
         <select
-          className="uci-w-full uci-bg-gray-800 uci-border uci-border-gray-600 uci-rounded uci-text-xs uci-px-2 uci-py-1 disabled:uci-opacity-60"
+          className="uci-w-full uci-bg-gray-800 uci-border uci-border-gray-600 uci-rounded uci-text-xs uci-text-gray-100 uci-px-2 uci-py-1 disabled:uci-opacity-60"
           disabled={!screenOptions.length}
           value={selectedScreen || ''}
           onChange={e => setSelectedScreen(e.target.value)}
@@ -247,7 +246,7 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
           {/* Variant selection */}
           <div className="uci-px-5 uci-py-3 uci-border-b uci-border-gray-800">
             <select
-              className="uci-w-full uci-bg-gray-800 uci-border uci-border-gray-600 uci-rounded uci-text-xs uci-px-2 uci-py-1"
+              className="uci-w-full uci-bg-gray-800 uci-border uci-border-gray-600 uci-rounded uci-text-xs uci-text-gray-100 uci-px-2 uci-py-1"
               value={variant}
               onChange={e => handleVariant(e.target.value)}
               disabled={!variantOptions.length}
@@ -257,9 +256,9 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
           </div>
           {/* Data Source + Version (version hidden in local mode) */}
             <div className="uci-px-5 uci-py-3 uci-border-b uci-border-gray-800">
-              {dataSource.toLowerCase() === 'local' ? (
+              {dataSource.toLowerCase().includes('local') ? (
                 <select
-                  className="uci-w-full uci-bg-gray-800 uci-border uci-border-gray-600 uci-rounded uci-text-xs uci-px-2 uci-py-1"
+                  className="uci-w-full uci-bg-gray-800 uci-border uci-border-gray-600 uci-rounded uci-text-xs uci-text-gray-100 uci-px-2 uci-py-1"
                   value={dataSource}
                   onChange={e => handleDataSource(e.target.value)}
                 >
@@ -268,14 +267,14 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
               ) : (
                 <div className="uci-flex uci-gap-3">
                   <select
-                    className="uci-w-1/2 uci-bg-gray-800 uci-border uci-border-gray-600 uci-rounded uci-text-xs uci-px-2 uci-py-1"
+                    className="uci-w-1/2 uci-bg-gray-800 uci-border uci-border-gray-600 uci-rounded uci-text-xs uci-text-gray-100 uci-px-2 uci-py-1"
                     value={dataSource}
                     onChange={e => handleDataSource(e.target.value)}
                   >
                     {dataSources.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
                   <select
-                    className="uci-w-1/2 uci-bg-gray-800 uci-border uci-border-gray-600 uci-rounded uci-text-xs uci-px-2 uci-py-1"
+                    className="uci-w-1/2 uci-bg-gray-800 uci-border uci-border-gray-600 uci-rounded uci-text-xs uci-text-gray-100 uci-px-2 uci-py-1"
                     value={version}
                     onChange={e => handleVersion(e.target.value)}
                   >
