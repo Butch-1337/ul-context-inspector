@@ -62,7 +62,9 @@ export function useUlManifest({ root, dataSource, version, enabled }: UseUlManif
       setLoading(true); setError(null);
       try {
         const local = dataSource.toLowerCase().includes('local');
-        const url = local ? '/manifest.json' : 'https://cdn.auth0.com/universal-login/manifest.json'; // placeholder CDN path
+        const url = local
+          ? '/manifest.json'
+          : 'https://assets.us.auth0.com/auth0-acul/manifest.json'; // placeholder CDN path
         const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
@@ -118,10 +120,10 @@ export function useUlManifest({ root, dataSource, version, enabled }: UseUlManif
     const info = getVariantInfo(screenValue);
     if (!info) return null;
     const { basePath } = info;
-    const filePath = `${basePath}/${variant}.json`;
+    const filePath = `${basePath}/${variant}.json`; // TO DO THIS SHOULD LOAD FROM PUBLIC of the other repo
     const local = dataSource.toLowerCase().includes('local');
-    const url = local ? (filePath.startsWith('/') ? filePath : '/' + filePath)
-      : `https://cdn.auth0.com/universal-login${filePath.startsWith('/') ? filePath : '/' + filePath}`;
+  const url = local ? (filePath.startsWith('/') ? filePath : '/' + filePath)
+      : `https://assets.us.auth0.com/auth0-acul/${filePath.startsWith('/') ? filePath : '/' + filePath}`;
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();

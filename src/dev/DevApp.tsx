@@ -1,18 +1,6 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { UniversalLoginContextPanel } from "../index";
 
-
-// // Universal login context (State 1 panel target)
-// if (!(window as any).universal_login_context) {
-//   (window as any).universal_login_context = {
-//     screen: "login-id",
-//     locale: "en-US",
-//     branding: { primaryColor: "#6366f1", logoUrl: "https://example.com/logo.png" },
-//     user: null,
-//     features: { passwordless: false, magicLink: true },
-//     timestamp: Date.now()
-//   };
-// }
 
 export const DevApp: React.FC = () => {
 
