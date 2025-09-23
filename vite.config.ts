@@ -3,15 +3,21 @@ import react from '@vitejs/plugin-react';
 import dts from 'vite-plugin-dts';
 
 export default defineConfig({
-  plugins: [react(), dts({ include: ['src'] })],
-  build: {
+  plugins: [
+    react(),
+    dts({
+      include: ['src'],
+      insertTypesEntry: true,
+      copyDtsFiles: true
+    })
+  ],  build: {
     lib: {
       entry: 'src/index.ts',
       name: 'UlContextInspector',
       fileName: (format) => `ul-context-inspector.${format}.js`
     },
     rollupOptions: {
-      external: ['react', 'react-dom'],
+      external: ['react', 'react-dom', 'react/jsx-runtime'],
       output: {
         globals: {
           react: 'React',
