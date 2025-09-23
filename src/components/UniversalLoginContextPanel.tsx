@@ -5,12 +5,18 @@ import React, {
   useEffect,
   useRef
 } from "react";
+
 import "../lib/tailwind.css";
 import "../lib/styles.css";
 import "prismjs/themes/prism-tomorrow.css"; // theme (can swap or override)
+
 import { useWindowJsonContext } from '../hooks/useWindowJsonContext';
 import { useUlManifest } from '../hooks/useUlManifest';
 import { JsonCodeEditor } from './JsonCodeEditor';
+import PanelHeader from './PanelHeader';
+import { IconButton, SearchIcon, CopyIcon, DownloadIcon, CloseIcon } from '../assets/icons';
+
+import type { UniversalLoginContextPanelProps, WindowLike } from '../types/universal-login-context-panel';
 
 /**
  * UniversalLoginContextPanel
@@ -34,28 +40,6 @@ import { JsonCodeEditor } from './JsonCodeEditor';
  * - JSON state management & debounced write handled by `useWindowJsonContext`.
  */
 
-
-export interface UniversalLoginContextPanelProps {
-  defaultOpen?: boolean;
-  width?: number | string;
-  root?: WindowLike;
-  screenLabel?: string;
-  variants?: string[]; // available variant options
-  dataSources?: string[]; // e.g. ['Auth0 CDN','Local']
-  versions?: string[]; // version tags
-  defaultVariant?: string;
-  defaultDataSource?: string;
-  defaultVersion?: string;
-  onVariantChange?: (value: string) => void;
-  onDataSourceChange?: (value: string) => void;
-  onVersionChange?: (value: string) => void;
-}
-
-interface WindowLike {
-  universal_login_context?: unknown;
-  [k: string]: unknown;
-}
-
 export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProps> = ({
   defaultOpen = true,
   width = 560,
@@ -74,11 +58,13 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
   onVersionChange
 }) => {
   const [open, setOpen] = useState(defaultOpen);
+
   // Immutable flag: did a context exist when we mounted? Defines true connectivity.
   const initialHadContextRef = useRef<boolean>(
     Object.prototype.hasOwnProperty.call(root, 'universal_login_context') &&
     (root as Record<string, unknown>).universal_login_context != null
   );
+
   // Selection state for disconnected preview UX.
   const [selectedScreen, setSelectedScreen] = useState<string | undefined>(undefined);
   const [variant, setVariant] = useState(() => defaultVariant || variants[0]);
@@ -92,12 +78,15 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
     debounceMs: 400,
     autoSyncOnActive: true,
     // Allow writes only if we started connected OR explicitly in local mode.
-  applyEnabled: initialHadContextRef.current || dataSource.toLowerCase().includes('local')
+    applyEnabled: initialHadContextRef.current || dataSource.toLowerCase().includes('local')
   });
+
   const [searchVisible, setSearchVisible] = useState(false);
   const [search, setSearch] = useState("");
+
   // True connectivity defined exclusively by initial presence (prevents accidental promotion).
   const isConnected = initialHadContextRef.current && !!contextObj;
+
   // Manifest (only loaded while disconnected & panel open)
   const { screenOptions, getVariantInfo, loadVariantJson, loading: manifestLoading, error: manifestError } = useUlManifest({
     root: root as Record<string, unknown>,
@@ -105,6 +94,7 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
     version,
     enabled: open && !isConnected
   });
+
   // Auto-select first screen once manifest arrives.
   useEffect(() => {
     if (!selectedScreen && screenOptions.length) setSelectedScreen(screenOptions[0].value);
@@ -144,9 +134,11 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
   const handleVariant = useCallback((v: string) => {
     setVariant(v); onVariantChange?.(v);
   }, [onVariantChange]);
+
   const handleDataSource = useCallback((v: string) => {
     setDataSource(v); onDataSourceChange?.(v);
   }, [onDataSourceChange]);
+
   const handleVersion = useCallback((v: string) => {
     setVersion(v); onVersionChange?.(v);
   }, [onVersionChange]);
@@ -204,29 +196,16 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
 
   return (
     <div
-  className="uci-fixed uci-top-0 uci-left-0 uci-h-screen uci-bg-gray-900 uci-text-white uci-shadow-xl uci-border-r uci-border-gray-700 uci-flex uci-flex-col uci-z-[99998] uci-transition-transform uci-duration-300 uci-ease-out uci-overflow-hidden uci-box-border"
+      className="uci-fixed uci-top-0 uci-left-0 uci-h-screen uci-bg-gray-900 uci-text-white uci-shadow-xl uci-border-r uci-border-gray-700 uci-flex uci-flex-col uci-z-[99998] uci-transition-transform uci-duration-300 uci-ease-out uci-overflow-hidden uci-box-border"
       style={{ width, transform: open ? "translateX(0)" : "translateX(-100%)" }}
     >
-  {/* Header / status */}
-      <div className="uci-flex uci-items-center uci-justify-between uci-px-5 uci-py-3 uci-border-b uci-border-gray-700">
-        <div className="uci-flex uci-items-center uci-gap-2">
-          <h2 className="uci-text-sm uci-font-semibold uci-tracking-wide">
-            Tenant Context Data
-          </h2>
-          {isConnected ? (
-            <span className="uci-inline-flex uci-items-center uci-rounded-full uci-bg-green-600 uci-text-white uci-text-[10px] uci-font-medium uci-px-2 uci-py-0.5">
-              Connected to tenant
-            </span>
-          ) : (
-            <span className="uci-inline-flex uci-items-center uci-rounded-full uci-bg-amber-600 uci-text-white uci-text-[10px] uci-font-medium uci-px-2 uci-py-0.5">
-              Not connected
-            </span>
-          )}
-        </div>
-        <IconButton label="Close" onClick={() => setOpen(false)}>
-          <CloseIcon />
-        </IconButton>
-      </div>
+      <PanelHeader
+        isConnected={isConnected}
+        isConnectedText="Connected to Tenant"
+        isNotConnectedText="Not connected"
+        setOpen={setOpen}
+        title="Tenant context data"
+      />
 
   {/* Screen selection (populated via manifest) */}
       <div className="uci-px-5 uci-py-3 uci-border-b uci-border-gray-800">
@@ -338,85 +317,3 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
     </div>
   );
 };
-
-const IconButton: React.FC<
-  React.PropsWithChildren<{
-    label: string;
-    onClick: () => void;
-    active?: boolean;
-  }>
-> = ({ label, onClick, children, active }) => (
-  <button
-    className={`uci-p-1 uci-rounded uci-border uci-text-gray-200 hover:uci-bg-gray-700 uci-border-gray-600 uci-transition-colors ${
-      active ? "uci-bg-gray-700" : "uci-bg-gray-800"
-    }`}
-    title={label}
-    onClick={onClick}
-    type="button"
-  >
-    {children}
-  </button>
-);
-
-const SearchIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="11" cy="11" r="7" />
-    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-  </svg>
-);
-const CopyIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-  </svg>
-);
-const DownloadIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-    <polyline points="7 10 12 15 17 10" />
-    <line x1="12" y1="15" x2="12" y2="3" />
-  </svg>
-);
-
-const CloseIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);
