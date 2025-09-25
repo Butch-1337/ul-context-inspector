@@ -74,6 +74,10 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
   const [variant, setVariant] = useState(() => defaultVariant || variants[0]);
   const [dataSource, setDataSource] = useState(() => defaultDataSource || dataSources[0]);
   const [version, setVersion] = useState(() => defaultVersion || versions[0]);
+  // Tracks if the user has manually edited the JSON buffer while disconnected.
+  // If true we avoid clobbering their edits when selection changes trigger
+  // manifest fetches. Selecting a new variant/data source/version resets it.
+  const [userEdited, setUserEdited] = useState(false);
 
   const { raw, setRaw, isValid, contextObj } = useWindowJsonContext({
     root,
@@ -82,7 +86,11 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
     debounceMs: 400,
     autoSyncOnActive: true,
     // Allow writes only if we started connected OR explicitly in local mode.
-    applyEnabled: initialHadContextRef.current || dataSource.toLowerCase().includes('local')
+    // applyEnabled: initialHadContextRef.current || dataSource.toLowerCase().includes('local')
+    // Always allow writes (edit in any mode requested).
+    applyEnabled: true,
+    // Emit a CustomEvent so host apps using the subscription hook re-render.
+    broadcastEventName: 'universal-login-context:updated'
   });
 
   const [isSearchVisible, setIsSearchVisible] = useState(false);
@@ -122,8 +130,9 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
 
   // Load variant JSON while disconnected to populate preview buffer only.
   useEffect(() => {
-    if (!open || isConnected) return;
-    if (!selectedScreen || !variant) return;
+    if (!open || isConnected) return;            // only for disconnected preview
+    if (!selectedScreen || !variant) return;     // need selection
+    if (userEdited) return;                      // preserve manual edits
     let cancelled = false;
     (async () => {
       try {
@@ -134,19 +143,25 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
       }
     })();
     return () => { cancelled = true; };
-  }, [open, isConnected, selectedScreen, variant, loadVariantJson, setRaw]);
+  }, [open, isConnected, selectedScreen, variant, loadVariantJson, setRaw, userEdited]);
 
 
   const handleVariant = useCallback((v: string) => {
-    setVariant(v); onVariantChange?.(v);
+    setVariant(v);
+    setUserEdited(false); // new selection should allow fresh manifest load
+    onVariantChange?.(v);
   }, [onVariantChange]);
 
   const handleDataSource = useCallback((v: string) => {
-    setDataSource(v); onDataSourceChange?.(v);
+    setDataSource(v);
+    setUserEdited(false);
+    onDataSourceChange?.(v);
   }, [onDataSourceChange]);
 
   const handleVersion = useCallback((v: string) => {
-    setVersion(v); onVersionChange?.(v);
+    setVersion(v);
+    setUserEdited(false);
+    onVersionChange?.(v);
   }, [onVersionChange]);
 
   // (Manifest fetch handled by useUlManifest)
