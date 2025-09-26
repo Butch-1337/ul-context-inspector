@@ -12,15 +12,15 @@ import {
 import type { PanelCodeEditorContainerProps } from "../types/components";
 
 const PanelCodeEditorContainer: React.FC<PanelCodeEditorContainerProps> = ({
-  onSearchButtonClick,
-  onDownloadButtonClick,
-  onCopyButtonClick,
-  onCloseButtonClick,
-  isSearchVisible,
-  onChangeSearch,
-  searchValue,
   children,
   codeWrap: initialCodeWrap = false,
+  isSearchVisible,
+  onChangeSearch,
+  onCloseButtonClick,
+  onCopyButtonClick,
+  onDownloadButtonClick,
+  onSearchButtonClick,
+  searchValue,
 }) => {
   const [codeWrap, setCodeWrap] = useState(initialCodeWrap);
 

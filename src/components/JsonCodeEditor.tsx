@@ -26,7 +26,8 @@ export const JsonCodeEditor: React.FC<JsonCodeEditorProps> = ({
   codeWrap = false
 }) => {
   // Derive line count for gutter; simple split is fine (no perf issues at our expected sizes).
-  // TODO: fix line count when content is wrapped (missing count at the list bottom)
+  // TODO (task size ++): fix line count when content is wrapped (missing count at the list bottom)
+  // maybe by calculating total height when codeWrap === true and divide line height
   const lineCount = useMemo(() => value.split('\n').length, [value]);
   return (
     <div
@@ -36,7 +37,7 @@ export const JsonCodeEditor: React.FC<JsonCodeEditorProps> = ({
     >
       {/* line digits */}
       <div className="uci-select-none uci-bg-[#171717] uci-text-gray-500 uci-text-[11px] uci-leading-4 uci-font-mono
-        uci-py-2 uci-pl-3 uci-pr-3 uci-border-r uci-border-gray-700 uci-min-w-[34px] uci-rounded-bl-lg">
+        uci-py-2 uci-pl-4 uci-pr-3 uci-border-r uci-border-gray-700 uci-min-w-[34px] uci-rounded-bl-lg">
         {Array.from({ length: lineCount }).map((_, i) => (
           <div key={i} className="uci-h-4 uci-flex uci-justify-end">{i + 1}</div>
         ))}
@@ -50,11 +51,11 @@ export const JsonCodeEditor: React.FC<JsonCodeEditorProps> = ({
         padding={8}
         textareaId={textareaId}
         preClassName={codeWrap ? "" : "!uci-whitespace-pre"}
-        className="uci-font-mono uci-text-[11px] uci-leading-4 uci-text-gray-100 focus:uci-outline-none uci-bg-[#17171]"
+        className="uci-font-mono !uci-overflow-visible uci-text-[11px] uci-leading-4 uci-text-gray-100 focus:uci-outline-none uci-bg-[#17171]"
         style={{
           outline: 'none',
           minHeight: '100%',
-          textWrap: 'inherit'
+          // whiteSpace: codeWrap ? '' : 'pre',
         }}
       />
 

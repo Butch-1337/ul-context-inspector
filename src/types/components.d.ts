@@ -11,8 +11,8 @@ export interface PanelHeaderProps {
 
 export interface PanelContainerProps {
   children: React.ReactNode;
-  width: number | string;
   open: boolean;
+  width: number | string;
 }
 
 export interface PanelSelectContextProps {
@@ -40,19 +40,18 @@ export interface Option {
 export type OptionInput = Option | string;
 
 export interface PanelCodeEditorContainerProps {
-  onSearchButtonClick: () => void;
-  onCloseButtonClick: () => void;
-  onDownloadButtonClick: () => void;
-  // isSearchActive: boolean;
-  onCopyButtonClick: () => void;
+  children: React.ReactNode;
+  codeWrap: boolean;
   isSearchVisible: boolean;
   onChangeSearch?: IFieldProps["onChange"];
+  onCloseButtonClick: () => void;
+  onCopyButtonClick: () => void;
+  onDownloadButtonClick: () => void;
+  onSearchButtonClick: () => void;
   searchValue?: string;
-  children: React.ReactNode;
-  codeWrap?: boolean;
 }
 
 export interface PanelToggleButtonProps {
-  panelTitle: string;
   onClick: () => void;
+  panelTitle: string;
 }
