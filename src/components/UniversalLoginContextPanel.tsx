@@ -241,10 +241,10 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
 
         {/* TODO: Test manifestLoading/error - should be displayed? in console or elsewhere? */}
         {manifestLoading && (
-          <div className="uci-px-5 uci-py-2 uci-text-[11px] uci-text-gray-400 uci-border-b uci-border-gray-800">Loading manifest…</div>
+          <div className="uci-py-2 uci-text-[11px] uci-text-gray-400 uci-border-b uci-border-gray-800">Loading manifest…</div>
         )}
         {manifestError && (
-          <div className="uci-px-5 uci-py-2 uci-text-[11px] uci-text-red-400 uci-border-b uci-border-gray-800">{manifestError}</div>
+          <div className="uci-py-2 uci-text-[11px] uci-text-red-400 uci-border-b uci-border-gray-800">{manifestError}</div>
         )}
       </div>
 

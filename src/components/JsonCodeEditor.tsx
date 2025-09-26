@@ -27,7 +27,7 @@ export const JsonCodeEditor: React.FC<JsonCodeEditorProps> = ({
 }) => {
   // Derive line count for gutter; simple split is fine (no perf issues at our expected sizes).
   // TODO (task size ++): fix line count when content is wrapped (missing count at the list bottom)
-  // maybe by calculating total height when codeWrap === true and divide line height
+  // maybe by calculating total height container when codeWrap === true and divide line height
   const lineCount = useMemo(() => value.split('\n').length, [value]);
   return (
     <div
@@ -35,7 +35,7 @@ export const JsonCodeEditor: React.FC<JsonCodeEditorProps> = ({
         isValid ? 'uci-border-gray-700' : 'uci-border-red-500'
       } uci-bg-[#171717] uci-rounded-b-lg`}
     >
-      {/* line digits */}
+      {/* editor line digits */}
       <div className="uci-select-none uci-bg-[#171717] uci-text-gray-500 uci-text-[11px] uci-leading-4 uci-font-mono
         uci-py-2 uci-pl-4 uci-pr-3 uci-border-r uci-border-gray-700 uci-min-w-[34px] uci-rounded-bl-lg">
         {Array.from({ length: lineCount }).map((_, i) => (
@@ -55,10 +55,10 @@ export const JsonCodeEditor: React.FC<JsonCodeEditorProps> = ({
         style={{
           outline: 'none',
           minHeight: '100%',
-          // whiteSpace: codeWrap ? '' : 'pre',
         }}
       />
 
+      {/* TODO: implement better UI for readonly filtered view */}
       {filtered && (
         <div className="uci-absolute uci-inset-0 uci-bg-black/40 uci-text-[11px] uci-text-gray-300 uci-flex uci-items-center uci-justify-center uci-pointer-events-none">
           <span>Filtered view (editing disabled)</span>
