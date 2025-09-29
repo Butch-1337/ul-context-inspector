@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "uci-inline-flex uci-items-center uci-justify-center uci-gap-2 uci-whitespace-nowrap uci-rounded-md uci-text-sm uci-font-medium uci-ring-offset-background uci-transition-colors focus-visible:uci-outline-none focus-visible:uci-ring-2 focus-visible:uci-ring-ring focus-visible:uci-ring-offset-2 disabled:uci-pointer-events-none disabled:uci-opacity-50 [&_svg]:uci-pointer-events-none [&_svg]:uci-size-4 [&_svg]:uci-shrink-0",
+  "uci-inline-flex uci-items-center uci-gap-2 uci-whitespace-nowrap uci-rounded-md uci-text-sm uci-font-medium uci-ring-offset-background uci-transition-colors focus-visible:uci-outline-none focus-visible:uci-ring-2 focus-visible:uci-ring-ring focus-visible:uci-ring-offset-2 disabled:uci-pointer-events-none [&_svg]:uci-pointer-events-none [&_svg]:uci-size-4 [&_svg]:uci-shrink-0",
   {
     variants: {
       variant: {
@@ -13,14 +13,14 @@ const buttonVariants = cva(
         destructive:
           "uci-bg-destructive uci-text-destructive-foreground hover:uci-bg-destructive/90",
         outline:
-          "uci-border uci-border-input uci-bg-background hover:uci-bg-accent hover:uci-text-accent-foreground",
+          "uci-border uci-border-[#808080] uci-bg-background hover:uci-bg-accent hover:uci-text-accent-foreground",
         secondary:
           "uci-bg-secondary uci-text-secondary-foreground hover:uci-bg-secondary/80",
         ghost: "hover:uci-bg-accent hover:uci-text-accent-foreground",
         link: "uci-text-primary uci-underline-offset-4 hover:uci-underline",
       },
       size: {
-        default: "uci-h-10 uci-px-4 uci-py-2",
+        default: "uci-h-9 uci-px-4 uci-py-2",
         sm: "uci-h-9 uci-rounded-md uci-px-3",
         lg: "uci-h-11 uci-rounded-md uci-px-8",
         icon: "uci-h-10 uci-w-10",

@@ -62,7 +62,4 @@
   * {
     @apply uci-border-border;
   }
-  body {
-    @apply uci-bg-background uci-text-foreground;
-  }
 }

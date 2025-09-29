@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Check, ChevronDown, ChevronUp } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, SpaceIcon } from "lucide-react";
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
@@ -121,7 +121,7 @@ const Select = ({
       }}
     >
       <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <div className="uci-relative" data-slot="select" {...props}>
+        <div className="uci-relative uci-w-full" data-slot="select" {...props}>
           {children}
         </div>
       </Popover>
@@ -161,7 +161,8 @@ const SelectTrigger = ({
   error,
   icon,
   className,
-  size = "default",
+  size = "sm",
+  prefix,
   children,
   ...props
 }: {
@@ -171,6 +172,7 @@ const SelectTrigger = ({
   icon?: React.ReactNode;
   className?: string;
   size?: "sm" | "default";
+  prefix?: string;
   children?: React.ReactNode;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>) => {
   const context = React.useContext(SelectContext);
@@ -243,7 +245,7 @@ const SelectTrigger = ({
   };
 
   return (
-    <PopoverTrigger>
+    <PopoverTrigger className={className} disabled={disabled}>
       <Button
         variant={error ? "destructive" : "outline"}
         disabled={disabled}
@@ -252,18 +254,27 @@ const SelectTrigger = ({
         data-slot="select-trigger"
         data-size={size}
         className={cn(
-          "uci-border-border/25 uci-text-input-foreground uci-shadow-input-resting hover:uci-shadow-input-hover hover:uci-border-border/0 focus-within:uci-outline-primary focus-within:uci-shadow-input-hover uci-bg-input disabled:uci-bg-muted uci-flex uci-w-full uci-justify-between uci-px-3 uci-ring-4 uci-ring-transparent uci-outline-4 disabled:uci-cursor-not-allowed",
+          "uci-border-border/25 uci-text-[#FBFBFB] uci-shadow-input-resting hover:uci-shadow-input-hover hover:uci-border-border/0 focus-within:uci-outline-primary focus-within:uci-shadow-input-hover uci-flex uci-w-full uci-px-3 uci-ring-4 uci-ring-transparent uci-outline-4 uci-border-solid disabled:uci-cursor-not-allowed uci-mb-2 uci-justify-between",
           context.isOpen && "focus-within:uci-outline-primary focus-within:uci-shadow-input-hover",
+          disabled ? "uci-justify-start !uci-bg-[#242424] uci-border-[#808080]" : "uci-justify-between !uci-bg-[#111111] uci-border-[#383838]",
           className
         )}
         id={context.id}
         {...props}
       >
         {icon && <div className="uci-text-primary uci-absolute uci-top-1/2 uci-left-3 uci--translate-y-1/2">{icon}</div>}
-        {children || <span className={cn("uci-text-primary uci-block uci-truncate")}>{selectedLabel || placeholder}</span>}
-        <ChevronDown
-          className={cn("uci-text-primary uci-size-4 uci-transition-transform uci-duration-200", context.isOpen && "uci-rotate-180")}
-        />
+        <span>
+          {prefix && <span className="uci-text-[#ABABAB] uci-mr-2">{prefix}:</span>}
+          {children ||
+          <span className={cn("uci-text-[#FBFBFB] uci-block uci-truncate")}>
+            {selectedLabel || placeholder}
+          </span>}
+        </span>
+        {!disabled &&
+          <ChevronDown
+            className={cn("uci-text-primary uci-size-4 uci-transition-transform uci-duration-200 uci-text-white", context.isOpen && "uci-rotate-180")}
+          />
+        }
       </Button>
     </PopoverTrigger>
   );
