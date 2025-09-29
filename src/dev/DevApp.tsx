@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { QuantumProvider, CssBaseline, Code } from '@auth0/quantum-product';
 import { UniversalLoginContextPanel } from "../index";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select-field";
 
 // Universal login context (State 1 panel target)
 // if (!(window as any).universal_login_context) {
@@ -43,18 +44,20 @@ import { UniversalLoginContextPanel } from "../index";
 
 export const DevApp: React.FC = () => {
   return (
-    <QuantumProvider>
-      <CssBaseline />
-      <UniversalLoginContextPanel />
-      <div style={{ padding: 40 }}>
-        <h1 className="uci-text-white uci-pt-10">
-          Universal Login Context Inspector
-        </h1>
-        <p className="uci-text-[#ABABAB]">
-          Dev Sandbox: Edit <Code sx={{backgroundColor: "#b7b2ff"}}>window.universal_login_context</Code> JSON via the left
-          panel.
-        </p>
-      </div>
-    </QuantumProvider>
+    <div>
+      {/* <QuantumProvider>
+        <CssBaseline /> */}
+        <UniversalLoginContextPanel />
+        <div style={{ padding: 40 }}>
+          <h1 className="uci-text-white uci-pt-10">
+            Universal Login Context Inspector
+          </h1>
+          <p className="uci-text-[#ABABAB]">
+            Dev Sandbox: Edit <Code sx={{backgroundColor: "#b7b2ff"}}>window.universal_login_context</Code> JSON via the left
+            panel.
+          </p>
+        </div>
+      {/* </QuantumProvider> */}
+    </div>
   );
 };

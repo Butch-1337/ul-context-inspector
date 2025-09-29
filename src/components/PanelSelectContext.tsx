@@ -1,5 +1,6 @@
 import React from 'react';
 import { SelectField } from '@auth0/quantum-product';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select-field";
 import type { PanelSelectContextProps, OptionInput } from '../types/components';
 
 const PanelSelectContext: React.FC<PanelSelectContextProps> = ({
@@ -51,6 +52,18 @@ const PanelSelectContext: React.FC<PanelSelectContextProps> = ({
         value={selectedScreen}
       />
 
+     <Select>
+      <SelectTrigger>
+        <SelectValue placeholder="Select a framework" />
+      </SelectTrigger>
+      <SelectContent>
+        {screenOptions.map((option) => (
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
       {!isConnected && (
         <div>
           <SelectField

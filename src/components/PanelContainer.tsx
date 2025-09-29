@@ -7,7 +7,7 @@ const PanelContainer: React.FC<PanelContainerProps> = ({ children, width, open }
   <div
     className="uci-fixed uci-min-h-full uci-top-0 uci-left-0  uci-bg-[#171717]
       uci-text-[#FBFBFB] uci-border-solid uci-border-r uci-border-[#2A2A2A] uci-flex uci-flex-col
-      uci-z-[99998] uci-px-6 uci-pt-4 uci-pb-6"
+      uci-z-[10] uci-px-6 uci-pt-4 uci-pb-6"
     style={{
       width,
       minHeight: '100vh',
