@@ -1,7 +1,6 @@
 import React from 'react';
 import { IconButton, CollapseIcon } from '../assets/icons';
 import { Label, StatusDot, StatusIcon, Text } from '@auth0/quantum-product';
-import * as theme from '@auth0/quantum-tokens';
 import type { PanelHeaderProps } from '../types/components';
 
 const PanelHeader: React.FC<PanelHeaderProps> = ({ title, isConnected, isConnectedText, isNotConnectedText, setOpen }) => {
@@ -14,9 +13,7 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({ title, isConnected, isConnect
           </h1>
           <Label
             sx={{
-              backgroundColor: isConnected ?
-                theme.auth0.dark.color_bg_state_success_subtle :
-                theme.auth0.dark.color_bg_state_caution_subtle,
+              backgroundColor: isConnected ? '#062A16' : '#292406',
               height: "20px",
               display: "flex",
               alignItems: "center",
@@ -29,8 +26,8 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({ title, isConnected, isConnect
               />
             <Text
               color={isConnected ?
-                theme.auth0.dark.color_fg_on_state_success_subtle :
-                theme.auth0.dark.color_fg_on_state_caution_subtle
+                '#98D2B2' :
+                '#E3C423'
               }
               variant="overline"
               sx={{ fontSize: '11px' }}
@@ -39,7 +36,7 @@ const PanelHeader: React.FC<PanelHeaderProps> = ({ title, isConnected, isConnect
             </Text>
           </Label>
         </div>
-        {/* What should the StatusIcon display/toggle? What info? */}
+        {/* TODO: What should the StatusIcon display/toggle? What info? Check with design/product */}
         {/* TODO: Add action to status icon */}
         <div className="uci-flex uci-items-center">
           <StatusIcon

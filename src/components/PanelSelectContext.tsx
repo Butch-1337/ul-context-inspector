@@ -1,5 +1,5 @@
 import React from 'react';
-import SelectField2 from "./universal-design/SelectField";
+import SelectField from "./SelectField";
 
 import type { PanelSelectContextProps } from '../types/components';
 
@@ -20,10 +20,7 @@ const PanelSelectContext: React.FC<PanelSelectContextProps> = ({
   }) => {
   {/* TODO: when connected to tenant, pass current screen name */}
   if (screenOptions?.length === 0) {
-    screenOptions = [{
-      value: selectedScreen || 'Current screen',
-      text: selectedScreen || 'Current screen'
-    }];
+    screenOptions = [selectedScreen || 'Current screen'];
   }
 
   const isLocalDevelopment = selectedDataSource?.toLowerCase().includes('local');
@@ -31,8 +28,7 @@ const PanelSelectContext: React.FC<PanelSelectContextProps> = ({
   return (
     <div className="uci-flex uci-flex-col">
       {/* TODO NICE TO HAVE: build searchable select to replace base select */}
-      {/* TODO: fix dropdown display to match design */}
-      <SelectField2
+      <SelectField
         name="panel-select-screen"
         prefix="Screen"
         options={screenOptions}
@@ -44,7 +40,7 @@ const PanelSelectContext: React.FC<PanelSelectContextProps> = ({
 
       {!isConnected && (
         <div>
-          <SelectField2
+          <SelectField
             name="panel-select-variant"
             disabled={variantOptions?.length <= 1}
             onChange={onChangeSelectVariant}
@@ -55,7 +51,7 @@ const PanelSelectContext: React.FC<PanelSelectContextProps> = ({
           />
 
           <div className="uci-flex uci-w-full">
-            <SelectField2
+            <SelectField
               name="panel-select-data-source"
               prefix="Data source"
               options={dataSourceOptions}
@@ -66,7 +62,7 @@ const PanelSelectContext: React.FC<PanelSelectContextProps> = ({
             />
 
             {!isLocalDevelopment && (
-              <SelectField2
+              <SelectField
                 name="panel-select-data-version"
                 prefix="Data version"
                 options={dataVersionOptions}
