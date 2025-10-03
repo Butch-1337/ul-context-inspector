@@ -238,7 +238,7 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
           variantOptions={variantOptions}
         />
 
-        {/* TODO: should this be displayed? in console or elsewhere? */}
+        {/* TODO: should be displayed? in console or elsewhere? */}
         {manifestLoading && (
           <div className="uci-py-2 uci-text-[11px] uci-text-gray-400 uci-border-b uci-border-gray-800">Loading manifest…</div>
         )}

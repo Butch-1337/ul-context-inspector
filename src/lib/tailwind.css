@@ -90,6 +90,7 @@
     --color-ring: oklch(40.17% 0 0 / 50%);
 
     /* Override standard shadcn variables with Universal Design colors converted to HSL */
+    /* note: generated with copilot - claude 4 */
     --background: 0 0% 0%; /* oklch(0% 0 0) = black */
     --foreground: 0 0% 95%; /* oklch(94.91% 0 0) = light gray */
     --card: 0 0% 0%;

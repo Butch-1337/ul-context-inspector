@@ -415,7 +415,7 @@ const SelectItem = ({
       className={cn(
         "uci-bg-[#171717] uci-relative uci-flex uci-w-full uci-items-center uci-justify-between uci-rounded uci-px-2 uci-py-1.5 uci-text-sm uci-outline-hidden uci-select-none uci-text-white",
         isSelected && "uci-text-[#99A7F1]",
-        isFocused && "uci-bg-[#111]",
+        isFocused && "!uci-bg-[#111111]",
         className
       )}
       {...props}

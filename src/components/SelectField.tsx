@@ -38,7 +38,7 @@ const SelectField = ({
       name={name}
       onValueChange={(value: string) => {
         if (!onChange) return;
-        // create synthetic event object (expected by component)
+        // create synthetic event object (expected by onChange)
         const syntheticEvent = {
           target: { value: value }
         };
@@ -51,7 +51,6 @@ const SelectField = ({
         className={`uci-w-full ${className || ''}`}
         disabled={disabled}
       >
-        {/* Custom SelectValue that uses our normalized options directly */}
         <span>
           {value ? normalizedOptions.find(opt => opt.value === value)?.text || placeholder : placeholder}
         </span>

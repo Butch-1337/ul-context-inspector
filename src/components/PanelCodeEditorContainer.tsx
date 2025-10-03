@@ -31,6 +31,7 @@ const PanelCodeEditorContainer: React.FC<PanelCodeEditorContainerProps> = ({
           {/* TODO: implement code/tree toggle feature */}
           Code / Tree
 
+          {/* TODO: implement UD checkbox */}
           <Checkbox onClick={event => setCodeWrap((event.target as HTMLInputElement).checked)}>
             Wrap
           </Checkbox>
@@ -59,6 +60,7 @@ const PanelCodeEditorContainer: React.FC<PanelCodeEditorContainerProps> = ({
         </div>
       </div>
 
+      {/* TODO: Migrate to UD */}
       {isSearchVisible && (
         <div className="uci-code-editor-search-area">
           <TextField

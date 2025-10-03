@@ -26,8 +26,8 @@ export const JsonCodeEditor: React.FC<JsonCodeEditorProps> = ({
   codeWrap = false
 }) => {
   // Derive line count for gutter; simple split is fine (no perf issues at our expected sizes).
-  // TODO (task size ++): fix line count when content is wrapped (missing count at the list bottom)
-  // maybe by calculating total height container when codeWrap === true and divide line height
+  // TODO: currently does not handle wrapping correctly (assign new line for wrapped segment and breaks line count at the end of snippet)
+  // To fix, switch to a better react editor like Monaco Editor https://www.npmjs.com/package/@monaco-editor/react
   const lineCount = useMemo(() => value.split('\n').length, [value]);
   return (
     <div
@@ -61,7 +61,7 @@ export const JsonCodeEditor: React.FC<JsonCodeEditorProps> = ({
       {/* TODO: implement better UI for readonly filtered view */}
       {filtered && (
         <div className="uci-absolute uci-inset-0 uci-bg-black/40 uci-text-[11px] uci-text-gray-300 uci-flex uci-items-center uci-justify-center uci-pointer-events-none">
-          <span>Filtered view (editing disabled)</span>
+          <span>Filtered view (hidden lines not shown)</span>
         </div>
       )}
     </div>

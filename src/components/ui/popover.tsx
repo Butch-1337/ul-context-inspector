@@ -133,7 +133,11 @@ function PopoverTrigger({ className, onClick, asChild, children, ...props }: Pop
       ref={triggerRef as React.RefObject<HTMLButtonElement>}
       data-slot="popover-trigger"
       data-state={open ? "open" : "closed"}
-      className={cn("uci-inline-flex", className)}
+      className={cn(
+        "uci-inline-flex",
+        props.disabled && "uci-pointer-events-none",
+        className
+      )}
       onClick={handleClick}
       {...props}
     >
