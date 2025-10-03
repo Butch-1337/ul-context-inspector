@@ -44,8 +44,8 @@ import { UniversalLoginContextPanel } from "../index";
 export const DevApp: React.FC = () => {
   return (
     <div>
-      <QuantumProvider>
-        <CssBaseline />
+      {/* <QuantumProvider> */}
+        {/* <CssBaseline /> */}
         <UniversalLoginContextPanel />
         <div style={{ padding: 40 }}>
           <h1 className="uci-text-white uci-pt-10">
@@ -56,7 +56,7 @@ export const DevApp: React.FC = () => {
             panel.
           </p>
         </div>
-      </QuantumProvider>
+      {/* </QuantumProvider> */}
     </div>
   );
 };

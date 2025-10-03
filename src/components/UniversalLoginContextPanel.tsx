@@ -200,17 +200,6 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
       .join("\n");
   }, [raw, search]);
 
-  // Convert options to the format expected by SelectField2
-  const convertToSelectOptions = (options: string[] | Array<{ value: string; label?: string; text?: string }>): Array<{ value: string; text: string }> => {
-    return options.map(option => {
-      if (typeof option === 'string') {
-        return { value: option, text: option };
-      } else {
-        return { value: option.value, text: option.text || option.label || option.value };
-      }
-    });
-  };
-
   // Panel fully hidden when closed (no persistent handle)
   if (!open) {
     return (
@@ -233,23 +222,23 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
         />
 
         <PanelSelectContext
-          dataSourceOptions={convertToSelectOptions(dataSources)}
-          dataVersionOptions={convertToSelectOptions(versions)}
+          dataSourceOptions={dataSources}
+          dataVersionOptions={versions}
           isConnected={isConnected}
           onChangeSelectDataSource={(event) => handleDataSource(event.target.value as string)}
           onChangeSelectDataVersion={(event) => handleVersion(event.target.value as string)}
           onChangeSelectScreen={(event) => setSelectedScreen(event.target.value as string)}
           onChangeSelectVariant={(event) => handleVariant(event.target.value as string)}
-          screenOptions={convertToSelectOptions(screenOptions)}
+          screenOptions={screenOptions}
           selectedDataSource={dataSource}
           selectedDataVersion={version}
           selectedScreen={selectedScreen}
           selectedVariant={variant}
           setSelectedScreen={setSelectedScreen}
-          variantOptions={convertToSelectOptions(variantOptions)}
+          variantOptions={variantOptions}
         />
 
-        {/* TODO: Test manifestLoading/error - should be displayed? in console or elsewhere? */}
+        {/* TODO: should this be displayed? in console or elsewhere? */}
         {manifestLoading && (
           <div className="uci-py-2 uci-text-[11px] uci-text-gray-400 uci-border-b uci-border-gray-800">Loading manifest…</div>
         )}

@@ -27,21 +27,23 @@ export interface SelectOption {
 
 export type OptionInput = Option | string;
 
+export type FlexibleOption = string | { value: string; text?: string; label?: string };
+
 export interface PanelSelectContextProps {
-  dataSourceOptions: SelectOption[];
-  dataVersionOptions: SelectOption[];
+  dataSourceOptions: FlexibleOption[];
+  dataVersionOptions: FlexibleOption[];
   isConnected: boolean;
   onChangeSelectDataSource: (event: { target: { value: string } }) => void;
   onChangeSelectDataVersion: (event: { target: { value: string } }) => void;
   onChangeSelectScreen: (event: { target: { value: string } }) => void;
   onChangeSelectVariant: (event: { target: { value: string } }) => void;
-  screenOptions: SelectOption[];
+  screenOptions: FlexibleOption[];
   selectedDataSource: string;
   selectedDataVersion: string;
   selectedScreen: string | undefined;
   selectedVariant: string;
   setSelectedScreen: (screen: string) => void;
-  variantOptions: SelectOption[];
+  variantOptions: FlexibleOption[];
 }
 
 export interface PanelCodeEditorContainerProps {
