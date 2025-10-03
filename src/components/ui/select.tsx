@@ -413,9 +413,9 @@ const SelectItem = ({
       }}
       data-slot="select-item"
       className={cn(
-        "hover:uci-bg-muted/50 focus:uci-bg-muted uci-relative uci-flex uci-w-full uci-items-center uci-justify-between uci-rounded-2xl uci-px-2 uci-py-1.5 uci-text-sm uci-outline-hidden uci-select-none",
-        isSelected && "uci-bg-muted",
-        isFocused && "uci-bg-muted/75",
+        "uci-bg-[#171717] uci-relative uci-flex uci-w-full uci-items-center uci-justify-between uci-rounded uci-px-2 uci-py-1.5 uci-text-sm uci-outline-hidden uci-select-none uci-text-white",
+        isSelected && "uci-text-[#99A7F1]",
+        isFocused && "uci-bg-[#111]",
         className
       )}
       {...props}

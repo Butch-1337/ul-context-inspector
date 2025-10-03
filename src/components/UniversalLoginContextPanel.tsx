@@ -50,7 +50,6 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
   root = typeof window !== "undefined"
     ? (window as unknown as WindowLike)
     : ({} as WindowLike),
-  screenLabel = "Current Screen",
   variants = ["default"],
   dataSources = ["Auth0 CDN", "Local development"],
   versions = ["1.0.0"],
@@ -201,6 +200,17 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
       .join("\n");
   }, [raw, search]);
 
+  // Convert options to the format expected by SelectField2
+  const convertToSelectOptions = (options: string[] | Array<{ value: string; label?: string; text?: string }>): Array<{ value: string; text: string }> => {
+    return options.map(option => {
+      if (typeof option === 'string') {
+        return { value: option, text: option };
+      } else {
+        return { value: option.value, text: option.text || option.label || option.value };
+      }
+    });
+  };
+
   // Panel fully hidden when closed (no persistent handle)
   if (!open) {
     return (
@@ -223,20 +233,20 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
         />
 
         <PanelSelectContext
-          dataSourceOptions={dataSources}
-          dataVersionOptions={versions}
+          dataSourceOptions={convertToSelectOptions(dataSources)}
+          dataVersionOptions={convertToSelectOptions(versions)}
           isConnected={isConnected}
           onChangeSelectDataSource={(event) => handleDataSource(event.target.value as string)}
           onChangeSelectDataVersion={(event) => handleVersion(event.target.value as string)}
           onChangeSelectScreen={(event) => setSelectedScreen(event.target.value as string)}
           onChangeSelectVariant={(event) => handleVariant(event.target.value as string)}
-          screenOptions={screenOptions}
+          screenOptions={convertToSelectOptions(screenOptions)}
           selectedDataSource={dataSource}
           selectedDataVersion={version}
           selectedScreen={selectedScreen}
           selectedVariant={variant}
           setSelectedScreen={setSelectedScreen}
-          variantOptions={variantOptions}
+          variantOptions={convertToSelectOptions(variantOptions)}
         />
 
         {/* TODO: Test manifestLoading/error - should be displayed? in console or elsewhere? */}

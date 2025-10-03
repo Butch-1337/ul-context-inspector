@@ -1,8 +1,7 @@
 import React from 'react';
-import { SelectField } from '@auth0/quantum-product';
 import SelectField2 from "./universal-design/SelectField";
 
-import type { PanelSelectContextProps, OptionInput } from '../types/components';
+import type { PanelSelectContextProps } from '../types/components';
 
 const PanelSelectContext: React.FC<PanelSelectContextProps> = ({
     dataSourceOptions,
@@ -22,24 +21,16 @@ const PanelSelectContext: React.FC<PanelSelectContextProps> = ({
   {/* TODO: when connected to tenant, pass current screen name */}
   if (screenOptions?.length === 0) {
     screenOptions = [{
-      label: selectedScreen || 'Current screen',
-      value: selectedScreen || 'Current screen'
+      value: selectedScreen || 'Current screen',
+      text: selectedScreen || 'Current screen'
     }];
   }
 
-  const isLocalDevelopment = selectedDataSource.toLowerCase().includes('local');
-
-  // TODO: Check if can remove if update UIManifest object schema to value instead of label
-  const mapOptions = (options: OptionInput[]): { value: string; text: string }[] => {
-    return options?.map((option) => ({
-      value: typeof option === 'object' ? option.value : option,
-      text: typeof option === 'object' ? option.label : option
-    }));
-  };
+  const isLocalDevelopment = selectedDataSource?.toLowerCase().includes('local');
 
   return (
     <div className="uci-flex uci-flex-col">
-      {/* TODO NICE TO HAVE (task size +++): build searchable select to replace base select */}
+      {/* TODO NICE TO HAVE: build searchable select to replace base select */}
       {/* TODO: fix dropdown display to match design */}
       <SelectField2
         name="panel-select-screen"
@@ -47,7 +38,7 @@ const PanelSelectContext: React.FC<PanelSelectContextProps> = ({
         options={screenOptions}
         value={selectedScreen}
         disabled={screenOptions?.length <= 1}
-        placeholder="Current screen"
+        placeholder={selectedScreen}
         onChange={onChangeSelectScreen}
       />
 
@@ -83,62 +74,6 @@ const PanelSelectContext: React.FC<PanelSelectContextProps> = ({
                 disabled={dataVersionOptions?.length <= 1}
                 placeholder={selectedDataVersion}
                 onChange={onChangeSelectDataVersion}
-              />
-            )}
-          </div>
-        </div>
-      )}
-
-      <SelectField
-        name="panel-select-screen"
-        options={mapOptions(screenOptions)}
-        size="small"
-        fullWidth={true}
-        prefix="Screen: "
-        classes={{ root: "uci-select-field" }}
-        disabled={screenOptions?.length <= 1}
-        onChange={onChangeSelectScreen}
-        value={selectedScreen}
-      />
-
-      {!isConnected && (
-        <div>
-          <SelectField
-            name="panel-select-variant"
-            options={mapOptions(variantOptions)}
-            size="small"
-            fullWidth={true}
-            prefix="Variant: "
-            classes={{root: "uci-select-field"}}
-            disabled={variantOptions?.length <= 1}
-            onChange={onChangeSelectVariant}
-            value={selectedVariant}
-          />
-
-          <div className="uci-flex">
-            <SelectField
-              name="panel-select-data-source"
-              options={mapOptions(dataSourceOptions)}
-              size="small"
-              fullWidth={true}
-              prefix="Data source: "
-              classes={{root: "uci-select-field"}}
-              disabled={dataSourceOptions?.length <= 1}
-              onChange={onChangeSelectDataSource}
-              value={selectedDataSource}
-            />
-
-            {!isLocalDevelopment && (
-              <SelectField
-                name="panel-select-data-version"
-                options={mapOptions(dataVersionOptions)}
-                size="small"
-                fullWidth={true}
-                prefix="Data version: "
-                classes={{root: "uci-select-field !uci-ml-2"}}
-                disabled={dataVersionOptions?.length <= 1}
-                onChange={onChangeSelectDataVersion}
-                value={selectedDataVersion}
               />
             )}
           </div>

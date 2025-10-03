@@ -1,6 +1,4 @@
-import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import type { OptionInput } from '../types/components';
 
 interface SelectFieldProps {
   name: string;
@@ -22,13 +20,6 @@ const SelectField = ({
   disabled
 }: SelectFieldProps) => {
 
-  const mapOptions = (options: OptionInput[]): { value: string; text: string }[] => {
-    return options?.map((option) => ({
-      value: typeof option === 'object' ? option.value : option,
-      text: typeof option === 'object' ? option.label : option
-    }));
-  };
-
   // Debug logging
   console.log('SelectField props:', { name, value, options, onChange: typeof onChange });
 
@@ -36,7 +27,9 @@ const SelectField = ({
     <Select
       name={name}
       onValueChange={(val) => {
-        // create synthetic event object to match SelectField expects
+        if (!onChange) return;
+
+        // Create synthetic event object
         const syntheticEvent = {
           target: { value: val }
         };
@@ -52,7 +45,7 @@ const SelectField = ({
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
-        {mapOptions(options)?.map((option) => (
+        {options?.map((option) => (
           <SelectItem
             key={option.value}
             value={option.value}
