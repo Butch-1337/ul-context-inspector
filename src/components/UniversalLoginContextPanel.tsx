@@ -259,8 +259,15 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
         {(codeWrap) => (
           <JsonCodeEditor
             value={search ? filteredDisplay : raw}
-            onChange={setRaw}
-            readOnly={Boolean(search || !isConnected)}
+            onChange={(val) => {
+              // If user begins editing while a filter is active we clear the filter
+              // so they are always editing the canonical full buffer, avoiding
+              // accidental truncation of hidden lines.
+              if (search) setSearch('');
+              setUserEdited(true);
+              setRaw(val);
+            }}
+            readOnly={false}
             isValid={isValid}
             filtered={Boolean(search)}
             textareaId="tenant-context-json-editor"
