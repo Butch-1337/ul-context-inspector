@@ -111,7 +111,6 @@ export function useUlManifest({
           )[topKey];
           if (container && typeof container === "object") {
             for (const childKey of Object.keys(container)) {
-              // TODO: Can the label be changed to 'text' here or transofrm later?
               opts.push({
                 value: `${topKey}:${childKey}`,
                 label: `${topKey} / ${childKey}`

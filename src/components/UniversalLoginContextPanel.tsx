@@ -11,7 +11,7 @@ import "../lib/styles.css";
 import "prismjs/themes/prism-tomorrow.css";
 
 import { useWindowJsonContext } from '../hooks/useWindowJsonContext';
-import { useUlManifest } from '../hooks/useUlManifest';
+import { useUlManifest, type UlManifest } from '../hooks/useUlManifest';
 
 import { JsonCodeEditor } from './JsonCodeEditor';
 import PanelHeader from './PanelHeader';
@@ -73,6 +73,7 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
   const [variant, setVariant] = useState(() => defaultVariant || variants[0]);
   const [dataSource, setDataSource] = useState(() => defaultDataSource || dataSources[0]);
   const [version, setVersion] = useState(() => defaultVersion || versions[0]);
+  const [localManifestData, setLocalManifestData] = useState<UlManifest | null>(null);
   // Tracks if the user has manually edited the JSON buffer while disconnected.
   // If true we avoid clobbering their edits when selection changes trigger
   // manifest fetches. Selecting a new variant/data source/version resets it.
@@ -113,17 +114,56 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
     if (!selectedScreen && screenOptions.length) setSelectedScreen(screenOptions[0].value);
   }, [screenOptions, selectedScreen]);
 
+  // Fetch local manifest to check if current screen exists locally
+  useEffect(() => {
+    if (!open || isConnected) return;
+    
+    let cancelled = false;
+    
+    (async () => {
+      try {
+        const res = await fetch('/manifest.json', { cache: 'no-store' });
+        if (res.ok && !cancelled) {
+          const data = await res.json();
+          setLocalManifestData(data);
+        }
+      } catch {
+        // If local manifest doesn't exist or fails to load, that's fine
+        if (!cancelled) setLocalManifestData(null);
+      }
+    })();
+    
+    return () => { cancelled = true; };
+  }, [open, isConnected]);
+
   // Derive variant options from manifest (fallback to provided variants prop).
   const variantOptions = useMemo(() => {
     if (!selectedScreen) return variants;
     const info = getVariantInfo(selectedScreen);
     return info ? info.variants : variants;
-  }, [selectedScreen, getVariantInfo, variants]);
+  }, [selectedScreen, getVariantInfo, variants, manifest]);
 
   // Derive version options from manifest (fallback to provided versions prop).
   const versionOptions = useMemo(() => {
     return manifest?.versions && manifest.versions.length > 0 ? manifest.versions : versions;
   }, [manifest, versions]);
+
+  // Check if current screen exists in local manifest
+  const screenExistsLocally = useMemo(() => {
+    if (!selectedScreen || !localManifestData?.screens) return false;
+    
+    const [topKey, childKey] = selectedScreen.split(':');
+    return localManifestData.screens.some(entry => entry[topKey]?.[childKey]);
+  }, [selectedScreen, localManifestData]);
+
+  // Filter data source options - only show "Local development" if current screen exists locally
+  const filteredDataSourceOptions = useMemo(() => {
+    if (!selectedScreen || !localManifestData) return dataSources;
+    
+    return screenExistsLocally 
+      ? dataSources 
+      : dataSources.filter(ds => !ds.toLowerCase().includes('local'));
+  }, [selectedScreen, localManifestData, dataSources, screenExistsLocally]);
 
   // Auto-select latest version when manifest loads
   useEffect(() => {
@@ -270,7 +310,7 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
         />
 
         <PanelSelectContext
-          dataSourceOptions={dataSources}
+          dataSourceOptions={filteredDataSourceOptions}
           dataVersionOptions={versionOptions}
           isConnected={isConnected}
           onChangeSelectDataSource={(event) => handleDataSource(event.target.value as string)}
@@ -286,7 +326,6 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
           variantOptions={variantOptions}
         />
 
-        {/* TODO: should be displayed? in console or elsewhere? */}
         {manifestLoading && (
           <div className="uci-py-2 uci-text-[11px] uci-text-gray-400 uci-border-b uci-border-gray-800">Loading manifest…</div>
         )}

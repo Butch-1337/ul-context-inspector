@@ -1,6 +1,5 @@
-import React, { useState} from "react";
+import React, { useState } from "react";
 
-import { TextField, Checkbox } from '@auth0/quantum-product';
 import {
   IconButton,
   SearchIcon,
@@ -27,14 +26,18 @@ const PanelCodeEditorContainer: React.FC<PanelCodeEditorContainerProps> = ({
   return (
     <div className="uci-code-editor-container">
       <div className="uci-code-editor-toolbar">
-        <div className="uci-code-editor-toolbar-toggles uci-flex uci-items-center">
-          {/* TODO: implement code/tree toggle feature */}
-          Code / Tree
+        <div className="uci-code-editor-toolbar-toggles uci-flex uci-items-center uci-gap-2">
+          Code
 
-          {/* TODO: implement UD checkbox */}
-          <Checkbox onClick={event => setCodeWrap((event.target as HTMLInputElement).checked)}>
-            Wrap
-          </Checkbox>
+          <label className="uci-flex uci-items-center uci-gap-1 uci-cursor-pointer uci-text-sm">
+            <input
+              type="checkbox"
+              checked={codeWrap}
+              onChange={(e) => setCodeWrap(e.target.checked)}
+              className="uci-cursor-pointer"
+            />
+            <span>Wrap</span>
+          </label>
         </div>
 
         <div className="uci-code-editor-toolbar-buttons">
@@ -60,15 +63,16 @@ const PanelCodeEditorContainer: React.FC<PanelCodeEditorContainerProps> = ({
         </div>
       </div>
 
-      {/* TODO: Migrate to UD */}
       {isSearchVisible && (
         <div className="uci-code-editor-search-area">
-          <TextField
+          <input
+            type="text"
             id="editor-search"
             name="editor-search-field"
             placeholder="Search keys and values..."
             onChange={onChangeSearch}
             value={searchValue}
+            className="uci-flex-1 uci-bg-[#111111] uci-border uci-border-[#383838] uci-rounded uci-px-3 uci-py-2 uci-text-white uci-text-sm focus:uci-outline-none focus:uci-border-[#99A7F1]"
           />
           <IconButton
             classNames="!uci-border-[#383838] !uci-border-solid uci-rounded
