@@ -145,8 +145,53 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
 
   // Derive version options from manifest (fallback to provided versions prop).
   const versionOptions = useMemo(() => {
-    return manifest?.versions && manifest.versions.length > 0 ? manifest.versions : versions;
+    const allVersions = manifest?.versions && manifest.versions.length > 0 ? manifest.versions : versions;
+    
+    // Sort versions in descending order
+    const sortedVersions = [...allVersions].sort((a, b) => {
+      // Extract version numbers for comparison (e.g., "v1.2032032.0" -> [1, 2032032, 0])
+      const aVersion = a.replace(/^v/, '').split('.').map(Number);
+      const bVersion = b.replace(/^v/, '').split('.').map(Number);
+      
+      // Compare each part
+      for (let i = 0; i < Math.max(aVersion.length, bVersion.length); i++) {
+        const aPart = aVersion[i] || 0;
+        const bPart = bVersion[i] || 0;
+        if (aPart !== bPart) {
+          return bPart - aPart; // Descending order
+        }
+      }
+      return 0;
+    });
+    
+    // Add "(latest)" suffix to the first (newest) version
+    if (sortedVersions.length > 0) {
+      sortedVersions[0] = `${sortedVersions[0]} (latest)`;
+    }
+    
+    return sortedVersions;
   }, [manifest, versions]);
+
+  // Get the display version with "(latest)" suffix if applicable
+  const displayVersion = useMemo(() => {
+    const rawVersions = manifest?.versions && manifest.versions.length > 0 ? manifest.versions : versions;
+    const sortedVersions = [...rawVersions].sort((a, b) => {
+      const aVersion = a.replace(/^v/, '').split('.').map(Number);
+      const bVersion = b.replace(/^v/, '').split('.').map(Number);
+      for (let i = 0; i < Math.max(aVersion.length, bVersion.length); i++) {
+        const aPart = aVersion[i] || 0;
+        const bPart = bVersion[i] || 0;
+        if (aPart !== bPart) return bPart - aPart;
+      }
+      return 0;
+    });
+    
+    // If current version is the latest, add "(latest)" suffix
+    if (sortedVersions.length > 0 && version === sortedVersions[0]) {
+      return `${version} (latest)`;
+    }
+    return version;
+  }, [version, manifest, versions]);
 
   // Check if current screen exists in local manifest
   const screenExistsLocally = useMemo(() => {
@@ -210,9 +255,11 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
   }, [onDataSourceChange]);
 
   const handleVersion = useCallback((v: string) => {
-    setVersion(v);
+    // Strip "(latest)" suffix if present
+    const cleanVersion = v.replace(/ \(latest\)$/, '');
+    setVersion(cleanVersion);
     setUserEdited(false);
-    onVersionChange?.(v);
+    onVersionChange?.(cleanVersion);
   }, [onVersionChange]);
 
   // (Manifest fetch handled by useUlManifest)
@@ -319,7 +366,7 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
           onChangeSelectVariant={(event) => handleVariant(event.target.value as string)}
           screenOptions={screenOptions}
           selectedDataSource={dataSource}
-          selectedDataVersion={version}
+          selectedDataVersion={displayVersion}
           selectedScreen={selectedScreen}
           selectedVariant={variant}
           setSelectedScreen={setSelectedScreen}
