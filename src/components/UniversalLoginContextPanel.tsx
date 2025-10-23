@@ -5,12 +5,22 @@ import React, {
   useEffect,
   useRef
 } from "react";
+
 import "../lib/tailwind.css";
 import "../lib/styles.css";
-import "prismjs/themes/prism-tomorrow.css"; // theme (can swap or override)
+import "prismjs/themes/prism-tomorrow.css";
+
 import { useWindowJsonContext } from '../hooks/useWindowJsonContext';
-import { useUlManifest } from '../hooks/useUlManifest';
+import { useUlManifest, type UlManifest } from '../hooks/useUlManifest';
+
 import { JsonCodeEditor } from './JsonCodeEditor';
+import PanelHeader from './PanelHeader';
+import PanelContainer from './PanelContainer';
+import PanelSelectContext from './PanelSelectContext';
+import PanelCodeEditorContainer from './PanelCodeEditorContainer';
+import PanelToggleButton from './PanelToggleButton';
+
+import type { UniversalLoginContextPanelProps, WindowLike } from '../types/universal-login-context-panel';
 
 /**
  * UniversalLoginContextPanel
@@ -34,35 +44,12 @@ import { JsonCodeEditor } from './JsonCodeEditor';
  * - JSON state management & debounced write handled by `useWindowJsonContext`.
  */
 
-
-export interface UniversalLoginContextPanelProps {
-  defaultOpen?: boolean;
-  width?: number | string;
-  root?: WindowLike;
-  screenLabel?: string;
-  variants?: string[]; // available variant options
-  dataSources?: string[]; // e.g. ['Auth0 CDN','Local']
-  versions?: string[]; // version tags
-  defaultVariant?: string;
-  defaultDataSource?: string;
-  defaultVersion?: string;
-  onVariantChange?: (value: string) => void;
-  onDataSourceChange?: (value: string) => void;
-  onVersionChange?: (value: string) => void;
-}
-
-interface WindowLike {
-  universal_login_context?: unknown;
-  [k: string]: unknown;
-}
-
 export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProps> = ({
   defaultOpen = true,
   width = 560,
   root = typeof window !== "undefined"
     ? (window as unknown as WindowLike)
     : ({} as WindowLike),
-  screenLabel = "Current Screen",
   variants = ["default"],
   dataSources = ["Auth0 CDN", "Local development"],
   versions = ["1.0.0"],
@@ -74,16 +61,19 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
   onVersionChange
 }) => {
   const [open, setOpen] = useState(defaultOpen);
+
   // Immutable flag: did a context exist when we mounted? Defines true connectivity.
   const initialHadContextRef = useRef<boolean>(
     Object.prototype.hasOwnProperty.call(root, 'universal_login_context') &&
     (root as Record<string, unknown>).universal_login_context != null
   );
+
   // Selection state for disconnected preview UX.
   const [selectedScreen, setSelectedScreen] = useState<string | undefined>(undefined);
   const [variant, setVariant] = useState(() => defaultVariant || variants[0]);
   const [dataSource, setDataSource] = useState(() => defaultDataSource || dataSources[0]);
   const [version, setVersion] = useState(() => defaultVersion || versions[0]);
+  const [localManifestData, setLocalManifestData] = useState<UlManifest | null>(null);
   // Tracks if the user has manually edited the JSON buffer while disconnected.
   // If true we avoid clobbering their edits when selection changes trigger
   // manifest fetches. Selecting a new variant/data source/version resets it.
@@ -95,33 +85,137 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
     active: open,
     debounceMs: 400,
     autoSyncOnActive: true,
+    // Allow writes only if we started connected OR explicitly in local mode.
+    // applyEnabled: initialHadContextRef.current || dataSource.toLowerCase().includes('local')
     // Always allow writes (edit in any mode requested).
-  applyEnabled: true,
-  // Emit a CustomEvent so host apps using the subscription hook re-render.
-  broadcastEventName: 'universal-login-context:updated'
+    applyEnabled: true,
+    // Emit a CustomEvent so host apps using the subscription hook re-render.
+    broadcastEventName: 'universal-login-context:updated'
   });
-  const [searchVisible, setSearchVisible] = useState(false);
+
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [search, setSearch] = useState("");
+
   // True connectivity defined exclusively by initial presence (prevents accidental promotion).
   const isConnected = initialHadContextRef.current && !!contextObj;
+
+  const panelTitle = isConnected ? "Tenant context data" : "Mock context data";
+
   // Manifest (only loaded while disconnected & panel open)
-  const { screenOptions, getVariantInfo, loadVariantJson, loading: manifestLoading, error: manifestError } = useUlManifest({
+  const { manifest, screenOptions, getVariantInfo, loadVariantJson, loading: manifestLoading, error: manifestError } = useUlManifest({
     root: root as Record<string, unknown>,
     dataSource,
     version,
     enabled: open && !isConnected
   });
+
   // Auto-select first screen once manifest arrives.
   useEffect(() => {
     if (!selectedScreen && screenOptions.length) setSelectedScreen(screenOptions[0].value);
   }, [screenOptions, selectedScreen]);
+
+  // Fetch local manifest to check if current screen exists locally
+  useEffect(() => {
+    if (!open || isConnected) return;
+    
+    let cancelled = false;
+    
+    (async () => {
+      try {
+        const res = await fetch('/manifest.json', { cache: 'no-store' });
+        if (res.ok && !cancelled) {
+          const data = await res.json();
+          setLocalManifestData(data);
+        }
+      } catch {
+        // If local manifest doesn't exist or fails to load, that's fine
+        if (!cancelled) setLocalManifestData(null);
+      }
+    })();
+    
+    return () => { cancelled = true; };
+  }, [open, isConnected]);
 
   // Derive variant options from manifest (fallback to provided variants prop).
   const variantOptions = useMemo(() => {
     if (!selectedScreen) return variants;
     const info = getVariantInfo(selectedScreen);
     return info ? info.variants : variants;
-  }, [selectedScreen, getVariantInfo, variants]);
+  }, [selectedScreen, getVariantInfo, variants, manifest]);
+
+  // Derive version options from manifest (fallback to provided versions prop).
+  const versionOptions = useMemo(() => {
+    const allVersions = manifest?.versions && manifest.versions.length > 0 ? manifest.versions : versions;
+    
+    // Sort versions in descending order
+    const sortedVersions = [...allVersions].sort((a, b) => {
+      // Extract version numbers for comparison (e.g., "v1.2032032.0" -> [1, 2032032, 0])
+      const aVersion = a.replace(/^v/, '').split('.').map(Number);
+      const bVersion = b.replace(/^v/, '').split('.').map(Number);
+      
+      // Compare each part
+      for (let i = 0; i < Math.max(aVersion.length, bVersion.length); i++) {
+        const aPart = aVersion[i] || 0;
+        const bPart = bVersion[i] || 0;
+        if (aPart !== bPart) {
+          return bPart - aPart; // Descending order
+        }
+      }
+      return 0;
+    });
+    
+    // Add "(latest)" suffix to the first (newest) version
+    if (sortedVersions.length > 0) {
+      sortedVersions[0] = `${sortedVersions[0]} (latest)`;
+    }
+    
+    return sortedVersions;
+  }, [manifest, versions]);
+
+  // Get the display version with "(latest)" suffix if applicable
+  const displayVersion = useMemo(() => {
+    const rawVersions = manifest?.versions && manifest.versions.length > 0 ? manifest.versions : versions;
+    const sortedVersions = [...rawVersions].sort((a, b) => {
+      const aVersion = a.replace(/^v/, '').split('.').map(Number);
+      const bVersion = b.replace(/^v/, '').split('.').map(Number);
+      for (let i = 0; i < Math.max(aVersion.length, bVersion.length); i++) {
+        const aPart = aVersion[i] || 0;
+        const bPart = bVersion[i] || 0;
+        if (aPart !== bPart) return bPart - aPart;
+      }
+      return 0;
+    });
+    
+    // If current version is the latest, add "(latest)" suffix
+    if (sortedVersions.length > 0 && version === sortedVersions[0]) {
+      return `${version} (latest)`;
+    }
+    return version;
+  }, [version, manifest, versions]);
+
+  // Check if current screen exists in local manifest
+  const screenExistsLocally = useMemo(() => {
+    if (!selectedScreen || !localManifestData?.screens) return false;
+    
+    const [topKey, childKey] = selectedScreen.split(':');
+    return localManifestData.screens.some(entry => entry[topKey]?.[childKey]);
+  }, [selectedScreen, localManifestData]);
+
+  // Filter data source options - only show "Local development" if current screen exists locally
+  const filteredDataSourceOptions = useMemo(() => {
+    if (!selectedScreen || !localManifestData) return dataSources;
+    
+    return screenExistsLocally 
+      ? dataSources 
+      : dataSources.filter(ds => !ds.toLowerCase().includes('local'));
+  }, [selectedScreen, localManifestData, dataSources, screenExistsLocally]);
+
+  // Auto-select latest version when manifest loads
+  useEffect(() => {
+    if (manifest?.versions && manifest.versions.length > 0 && !manifest.versions.includes(version)) {
+      setVersion(manifest.versions[0]);
+    }
+  }, [manifest, version]);
 
   // Ensure selected variant remains valid when options change.
   useEffect(() => {
@@ -153,15 +247,19 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
     setUserEdited(false); // new selection should allow fresh manifest load
     onVariantChange?.(v);
   }, [onVariantChange]);
+
   const handleDataSource = useCallback((v: string) => {
     setDataSource(v);
     setUserEdited(false);
     onDataSourceChange?.(v);
   }, [onDataSourceChange]);
+
   const handleVersion = useCallback((v: string) => {
-    setVersion(v);
+    // Strip "(latest)" suffix if present
+    const cleanVersion = v.replace(/ \(latest\)$/, '');
+    setVersion(cleanVersion);
     setUserEdited(false);
-    onVersionChange?.(v);
+    onVersionChange?.(cleanVersion);
   }, [onVersionChange]);
 
   // (Manifest fetch handled by useUlManifest)
@@ -191,252 +289,118 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
     }
   }, [raw, variant, selectedScreen]);
 
-  // Line-level filtering for lightweight search UX (non-destructive view layer only).
-  const filteredDisplay = useMemo(() => {
-    if (!search) return raw;
+  // Line-level filtering for search - tracks line indices for editable filtered view
+  const { filteredDisplay, filteredLineIndices } = useMemo(() => {
+    if (!search) return { filteredDisplay: raw, filteredLineIndices: null };
     const lower = search.toLowerCase();
-    return raw
-      .split(/\n/)
-      .filter((line) => line.toLowerCase().includes(lower))
-      .join("\n");
+    const lines = raw.split('\n');
+    const matchedIndices: number[] = [];
+    const matchedLines: string[] = [];
+    
+    lines.forEach((line, index) => {
+      if (line.toLowerCase().includes(lower)) {
+        matchedIndices.push(index);
+        matchedLines.push(line);
+      }
+    });
+    
+    return {
+      filteredDisplay: matchedLines.join('\n'),
+      filteredLineIndices: matchedIndices
+    };
   }, [raw, search]);
+
+  // Handle edits to filtered content by mapping back to original lines
+  const handleFilteredEdit = useCallback((editedFiltered: string) => {
+    if (!search || !filteredLineIndices) {
+      // No filter active, direct edit
+      setUserEdited(true);
+      setRaw(editedFiltered);
+      return;
+    }
+
+    // Map edited filtered lines back to original content
+    const originalLines = raw.split('\n');
+    const editedLines = editedFiltered.split('\n');
+    
+    // Update only the filtered lines in the original content
+    editedLines.forEach((editedLine, filterIndex) => {
+      const originalIndex = filteredLineIndices[filterIndex];
+      if (originalIndex !== undefined && originalIndex < originalLines.length) {
+        originalLines[originalIndex] = editedLine;
+      }
+    });
+    
+    setUserEdited(true);
+    setRaw(originalLines.join('\n'));
+  }, [raw, search, filteredLineIndices]);
 
   // Panel fully hidden when closed (no persistent handle)
   if (!open) {
     return (
-      <button
-        type="button"
-        aria-label="Open tenant context panel"
+      <PanelToggleButton
         onClick={() => setOpen(true)}
-        className="uci-fixed uci-top-1/2 uci--translate-y-1/2 uci-left-4 uci-bg-indigo-600 hover:uci-bg-indigo-500 uci-text-white uci-font-medium uci-text-xs uci-px-3 uci-py-2 uci-rounded uci-shadow uci-z-[99998]"
-      >
-        Tenant Context Data
-      </button>
+        panelTitle={panelTitle}
+      />
     );
   }
 
   return (
-    <div
-  className="uci-fixed uci-top-0 uci-left-0 uci-h-screen uci-bg-gray-900 uci-text-white uci-shadow-xl uci-border-r uci-border-gray-700 uci-flex uci-flex-col uci-z-[99998] uci-transition-transform uci-duration-300 uci-ease-out uci-overflow-hidden uci-box-border"
-      style={{ width, transform: open ? "translateX(0)" : "translateX(-100%)" }}
-    >
-  {/* Header / status */}
-      <div className="uci-flex uci-items-center uci-justify-between uci-px-5 uci-py-3 uci-border-b uci-border-gray-700">
-        <div className="uci-flex uci-items-center uci-gap-2">
-          <h2 className="uci-text-sm uci-font-semibold uci-tracking-wide">
-            Tenant Context Data
-          </h2>
-          {isConnected ? (
-            <span className="uci-inline-flex uci-items-center uci-rounded-full uci-bg-green-600 uci-text-white uci-text-[10px] uci-font-medium uci-px-2 uci-py-0.5">
-              Connected to tenant
-            </span>
-          ) : (
-            <span className="uci-inline-flex uci-items-center uci-rounded-full uci-bg-amber-600 uci-text-white uci-text-[10px] uci-font-medium uci-px-2 uci-py-0.5">
-              Not connected
-            </span>
-          )}
-        </div>
-        <IconButton label="Close" onClick={() => setOpen(false)}>
-          <CloseIcon />
-        </IconButton>
+    <PanelContainer width={width} open={open}>
+      <div>
+        <PanelHeader
+          isConnected={isConnected}
+          isConnectedText="Connected to Tenant"
+          isNotConnectedText="Not connected to tenant"
+          setOpen={setOpen}
+          title={panelTitle}
+        />
+
+        <PanelSelectContext
+          dataSourceOptions={filteredDataSourceOptions}
+          dataVersionOptions={versionOptions}
+          isConnected={isConnected}
+          onChangeSelectDataSource={(event) => handleDataSource(event.target.value as string)}
+          onChangeSelectDataVersion={(event) => handleVersion(event.target.value as string)}
+          onChangeSelectScreen={(event) => setSelectedScreen(event.target.value as string)}
+          onChangeSelectVariant={(event) => handleVariant(event.target.value as string)}
+          screenOptions={screenOptions}
+          selectedDataSource={dataSource}
+          selectedDataVersion={displayVersion}
+          selectedScreen={selectedScreen}
+          selectedVariant={variant}
+          setSelectedScreen={setSelectedScreen}
+          variantOptions={variantOptions}
+        />
+
+        {manifestLoading && (
+          <div className="uci-py-2 uci-text-[11px] uci-text-gray-400 uci-border-b uci-border-gray-800">Loading manifest…</div>
+        )}
+        {manifestError && (
+          <div className="uci-py-2 uci-text-[11px] uci-text-red-400 uci-border-b uci-border-gray-800">{manifestError}</div>
+        )}
       </div>
 
-  {/* Screen selection (populated via manifest) */}
-      <div className="uci-px-5 uci-py-3 uci-border-b uci-border-gray-800">
-        <select
-          className="uci-w-full uci-bg-gray-800 uci-border uci-border-gray-600 uci-rounded uci-text-xs uci-text-gray-100 uci-px-2 uci-py-1 disabled:uci-opacity-60"
-          disabled={!screenOptions.length}
-          value={selectedScreen || ''}
-          onChange={e => setSelectedScreen(e.target.value)}
-        >
-          {screenOptions.length === 0 && <option value="">{screenLabel}</option>}
-          {screenOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select>
-      </div>
-
-      {!isConnected && (
-        <>
-          {/* Variant selection */}
-          <div className="uci-px-5 uci-py-3 uci-border-b uci-border-gray-800">
-            <select
-              className="uci-w-full uci-bg-gray-800 uci-border uci-border-gray-600 uci-rounded uci-text-xs uci-text-gray-100 uci-px-2 uci-py-1"
-              value={variant}
-              onChange={e => handleVariant(e.target.value)}
-              disabled={!variantOptions.length}
-            >
-              {variantOptions.map(v => <option key={v} value={v}>{v}</option>)}
-            </select>
-          </div>
-          {/* Data Source + Version (version hidden in local mode) */}
-            <div className="uci-px-5 uci-py-3 uci-border-b uci-border-gray-800">
-              {dataSource.toLowerCase().includes('local') ? (
-                <select
-                  className="uci-w-full uci-bg-gray-800 uci-border uci-border-gray-600 uci-rounded uci-text-xs uci-text-gray-100 uci-px-2 uci-py-1"
-                  value={dataSource}
-                  onChange={e => handleDataSource(e.target.value)}
-                >
-                  {dataSources.map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
-              ) : (
-                <div className="uci-flex uci-gap-3">
-                  <select
-                    className="uci-w-1/2 uci-bg-gray-800 uci-border uci-border-gray-600 uci-rounded uci-text-xs uci-text-gray-100 uci-px-2 uci-py-1"
-                    value={dataSource}
-                    onChange={e => handleDataSource(e.target.value)}
-                  >
-                    {dataSources.map(d => <option key={d} value={d}>{d}</option>)}
-                  </select>
-                  <select
-                    className="uci-w-1/2 uci-bg-gray-800 uci-border uci-border-gray-600 uci-rounded uci-text-xs uci-text-gray-100 uci-px-2 uci-py-1"
-                    value={version}
-                    onChange={e => handleVersion(e.target.value)}
-                  >
-                    {versions.map(ver => <option key={ver} value={ver}>{ver}</option>)}
-                  </select>
-                </div>
-              )}
-            </div>
-            {manifestLoading && (
-              <div className="uci-px-5 uci-py-2 uci-text-[11px] uci-text-gray-400 uci-border-b uci-border-gray-800">Loading manifest…</div>
-            )}
-            {manifestError && (
-              <div className="uci-px-5 uci-py-2 uci-text-[11px] uci-text-red-400 uci-border-b uci-border-gray-800">{manifestError}</div>
-            )}
-        </>
-      )}
-
-  {/* Toolbar: search toggle, download, copy */}
-      <div className="uci-flex uci-items-center uci-justify-end uci-gap-2 uci-px-5 uci-py-2.5 uci-border-b uci-border-gray-800">
-        <IconButton
-          label="Search"
-          onClick={() => setSearchVisible((v) => !v)}
-          active={searchVisible}
-        >
-          <SearchIcon />
-        </IconButton>
-        <IconButton label="Download JSON" onClick={onDownload}>
-          <DownloadIcon />
-        </IconButton>
-        <IconButton label="Copy JSON" onClick={onCopy}>
-          <CopyIcon />
-        </IconButton>
-      </div>
-
-      {searchVisible && (
-        <div className="uci-px-5 uci-py-2.5 uci-border-b uci-border-gray-800 uci-min-w-0">
-          <div className="uci-min-w-0">
-            <input
-              type="text"
-              className="uci-w-full uci-bg-gray-800 uci-border uci-border-gray-600 focus:uci-ring-2 focus:uci-ring-indigo-500 uci-rounded uci-text-xs uci-px-2 uci-py-1"
-              placeholder="Search (filters lines)"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-        </div>
-      )}
-
-      <div className="uci-flex-1 uci-overflow-hidden uci-flex uci-flex-col">
-        <div className="uci-flex-1 uci-overflow-auto uci-px-5 uci-pt-4 uci-pb-8">
+      <PanelCodeEditorContainer
+        onSearchButtonClick={() => setIsSearchVisible((v) => !v)}
+        onDownloadButtonClick={onDownload}
+        onCopyButtonClick={onCopy}
+        isSearchVisible={isSearchVisible}
+        onChangeSearch={(event: { target: { value: string; }; }) => setSearch(event.target.value as string)}
+        onCloseButtonClick={() => { setIsSearchVisible(false); setSearch(''); }}
+        searchValue={search}
+      >
+        {(codeWrap) => (
           <JsonCodeEditor
             value={search ? filteredDisplay : raw}
-            onChange={(val) => {
-              // If user begins editing while a filter is active we clear the filter
-              // so they are always editing the canonical full buffer, avoiding
-              // accidental truncation of hidden lines.
-              if (search) setSearch("");
-              setUserEdited(true);
-              setRaw(val);
-            }}
-            readOnly={false} // Always editable per requirements.
+            onChange={handleFilteredEdit}
+            readOnly={false}
             isValid={isValid}
-            filtered={Boolean(search)}
             textareaId="tenant-context-json-editor"
+            codeWrap={codeWrap}
           />
-        </div>
-      </div>
-    </div>
+        )}
+      </PanelCodeEditorContainer>
+    </PanelContainer>
   );
 };
-
-const IconButton: React.FC<
-  React.PropsWithChildren<{
-    label: string;
-    onClick: () => void;
-    active?: boolean;
-  }>
-> = ({ label, onClick, children, active }) => (
-  <button
-    className={`uci-p-1 uci-rounded uci-border uci-text-gray-200 hover:uci-bg-gray-700 uci-border-gray-600 uci-transition-colors ${
-      active ? "uci-bg-gray-700" : "uci-bg-gray-800"
-    }`}
-    title={label}
-    onClick={onClick}
-    type="button"
-  >
-    {children}
-  </button>
-);
-
-const SearchIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="11" cy="11" r="7" />
-    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-  </svg>
-);
-const CopyIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-  </svg>
-);
-const DownloadIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-    <polyline points="7 10 12 15 17 10" />
-    <line x1="12" y1="15" x2="12" y2="3" />
-  </svg>
-);
-
-const CloseIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);

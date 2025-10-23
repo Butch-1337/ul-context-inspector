@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import * as React from 'react';
+import InlineCode from '../components/ui/inline-code';
 import { UniversalLoginContextPanel } from "../index";
 
 // Universal login context (State 1 panel target)
@@ -42,14 +43,17 @@ import { UniversalLoginContextPanel } from "../index";
 
 export const DevApp: React.FC = () => {
   return (
-    <div style={{ padding: 40 }}>
-      <h1>ul-context-inspector Dev Sandbox</h1>
-      <p>
-        Edit <code>window.universal_login_context</code> JSON via the left
-        panel.
-      </p>
-      {/* Left-side panel for universal_login_context (State 1) */}
-      <UniversalLoginContextPanel />
+    <div>
+        <UniversalLoginContextPanel />
+        <div style={{ padding: 40 }}>
+          <h1 className="uci-text-white uci-pt-10">
+            Universal Login Context Inspector
+          </h1>
+          <p className="uci-text-[#ABABAB]">
+            Dev Sandbox: Edit <InlineCode sx={{backgroundColor: "#b7b2ff"}}>window.universal_login_context</InlineCode> JSON via the left
+            panel.
+          </p>
+        </div>
     </div>
   );
 };
