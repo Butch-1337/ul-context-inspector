@@ -31,13 +31,14 @@
   margin-left: 8px;
   cursor: pointer;
 }
-.uci-context-inspector-root .uci-code-editor-search-area {
+.uci-code-editor-search-area {
   display: flex;
   align-items: center;
   padding: 8px;
+  margin-bottom: 8px;
 }
 
-.uci-context-inspector-root .uci-code-editor-search-area #editor-search-control {
+.uci-code-editor-search-area #editor-search-control {
   height: 16px;
   background-color: hsl(var(--uci-background));
   color: hsl(var(--uci-foreground));
