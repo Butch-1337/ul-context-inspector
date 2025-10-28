@@ -12,7 +12,7 @@
   top: 0;
   bottom: 0;
   width: 400px;
-  z-index: 999999;
+  z-index: 40;
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 1rem;
@@ -59,11 +59,25 @@
   color: hsl(var(--uci-foreground));
 }
 
-/* Scoped reset for all children */
+/* Scoped reset for all children - box-sizing only */
 .uci-context-inspector-root *,
 .uci-context-inspector-root *::before,
 .uci-context-inspector-root *::after {
   box-sizing: inherit;
+}
+
+/* Selective margin/padding reset - only for specific elements that need it */
+/* This prevents breaking component spacing while still providing a clean slate */
+.uci-context-inspector-root h1,
+.uci-context-inspector-root h2,
+.uci-context-inspector-root h3,
+.uci-context-inspector-root h4,
+.uci-context-inspector-root h5,
+.uci-context-inspector-root h6,
+.uci-context-inspector-root p,
+.uci-context-inspector-root ul,
+.uci-context-inspector-root ol,
+.uci-context-inspector-root li {
   margin: 0;
   padding: 0;
 }
@@ -95,10 +109,6 @@
 .uci-context-inspector-root input,
 .uci-context-inspector-root textarea,
 .uci-context-inspector-root select {
-  font: inherit;
-  margin: 0;
-  padding: 0;
-  border: none;
   background: transparent;
   outline: none;
 }
@@ -106,6 +116,16 @@
 .uci-context-inspector-root button {
   background-color: transparent;
   cursor: pointer;
+}
+
+.uci-context-inspector-root button {
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.uci-context-inspector-root button[data-slot="popover-trigger"],
+button[data-slot="select-item"] {
+  border: none
 }
 
 /* Separate class for portaled content (popovers, dropdowns, etc.) */

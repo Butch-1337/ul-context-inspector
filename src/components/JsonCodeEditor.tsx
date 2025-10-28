@@ -32,7 +32,7 @@ export const JsonCodeEditor: React.FC<JsonCodeEditorProps> = ({
       } uci-bg-[#171717] uci-rounded-b-lg`}
     >
       {/* editor line digits */}
-      <div className="uci-select-none uci-bg-[#171717] uci-text-gray-500 uci-text-[11px] uci-leading-4 uci-font-mono
+      <div className="uci-code-editor-digits uci-select-none uci-bg-[#171717] uci-text-gray-500 uci-text-[11px] uci-leading-4 uci-font-mono
         uci-py-2 uci-pl-4 uci-pr-3 uci-border-r uci-border-gray-700 uci-min-w-[34px] uci-rounded-bl-lg">
         {Array.from({ length: lineCount }).map((_, i) => (
           <div key={i} className="uci-h-4 uci-flex uci-justify-end">{i + 1}</div>

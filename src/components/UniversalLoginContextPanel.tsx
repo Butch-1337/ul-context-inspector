@@ -338,69 +338,73 @@ export const UniversalLoginContextPanel: React.FC<UniversalLoginContextPanelProp
   // Panel fully hidden when closed (no persistent handle)
   if (!open) {
     return (
-      <PanelToggleButton
-        onClick={() => setOpen(true)}
-        panelTitle={panelTitle}
-      />
+      <div className="uci-context-inspector-root">
+        <PanelToggleButton
+          onClick={() => setOpen(true)}
+          panelTitle={panelTitle}
+        />
+      </div>
     );
   }
 
   return (
-    <PanelContainer width={width} open={open}>
-      <div>
-        <PanelHeader
-          isConnected={isConnected}
-          isConnectedText="Connected to Tenant"
-          isNotConnectedText="Not connected to tenant"
-          setOpen={setOpen}
-          title={panelTitle}
-        />
-
-        <PanelSelectContext
-          dataSourceOptions={filteredDataSourceOptions}
-          dataVersionOptions={versionOptions}
-          isConnected={isConnected}
-          onChangeSelectDataSource={(event) => handleDataSource(event.target.value as string)}
-          onChangeSelectDataVersion={(event) => handleVersion(event.target.value as string)}
-          onChangeSelectScreen={(event) => setSelectedScreen(event.target.value as string)}
-          onChangeSelectVariant={(event) => handleVariant(event.target.value as string)}
-          screenOptions={screenOptions}
-          selectedDataSource={dataSource}
-          selectedDataVersion={displayVersion}
-          selectedScreen={selectedScreen}
-          selectedVariant={variant}
-          setSelectedScreen={setSelectedScreen}
-          variantOptions={variantOptions}
-        />
-
-        {manifestLoading && (
-          <div className="uci-py-2 uci-text-[11px] uci-text-gray-400 uci-border-b uci-border-gray-800">Loading manifest…</div>
-        )}
-        {manifestError && (
-          <div className="uci-py-2 uci-text-[11px] uci-text-red-400 uci-border-b uci-border-gray-800">{manifestError}</div>
-        )}
-      </div>
-
-      <PanelCodeEditorContainer
-        onSearchButtonClick={() => setIsSearchVisible((v) => !v)}
-        onDownloadButtonClick={onDownload}
-        onCopyButtonClick={onCopy}
-        isSearchVisible={isSearchVisible}
-        onChangeSearch={(event: { target: { value: string; }; }) => setSearch(event.target.value as string)}
-        onCloseButtonClick={() => { setIsSearchVisible(false); setSearch(''); }}
-        searchValue={search}
-      >
-        {(codeWrap) => (
-          <JsonCodeEditor
-            value={search ? filteredDisplay : raw}
-            onChange={handleFilteredEdit}
-            readOnly={false}
-            isValid={isValid}
-            textareaId="tenant-context-json-editor"
-            codeWrap={codeWrap}
+    <div className="uci-context-inspector-root">  
+      <PanelContainer width={width} open={open}>
+        <div>
+          <PanelHeader
+            isConnected={isConnected}
+            isConnectedText="Connected to Tenant"
+            isNotConnectedText="Not connected to tenant"
+            setOpen={setOpen}
+            title={panelTitle}
           />
-        )}
-      </PanelCodeEditorContainer>
-    </PanelContainer>
+
+          <PanelSelectContext
+            dataSourceOptions={filteredDataSourceOptions}
+            dataVersionOptions={versionOptions}
+            isConnected={isConnected}
+            onChangeSelectDataSource={(event) => handleDataSource(event.target.value as string)}
+            onChangeSelectDataVersion={(event) => handleVersion(event.target.value as string)}
+            onChangeSelectScreen={(event) => setSelectedScreen(event.target.value as string)}
+            onChangeSelectVariant={(event) => handleVariant(event.target.value as string)}
+            screenOptions={screenOptions}
+            selectedDataSource={dataSource}
+            selectedDataVersion={displayVersion}
+            selectedScreen={selectedScreen}
+            selectedVariant={variant}
+            setSelectedScreen={setSelectedScreen}
+            variantOptions={variantOptions}
+          />
+
+          {manifestLoading && (
+            <div className="uci-py-2 uci-text-[11px] uci-text-gray-400 uci-border-b uci-border-gray-800">Loading manifest…</div>
+          )}
+          {manifestError && (
+            <div className="uci-py-2 uci-text-[11px] uci-text-red-400 uci-border-b uci-border-gray-800">{manifestError}</div>
+          )}
+        </div>
+
+        <PanelCodeEditorContainer
+          onSearchButtonClick={() => setIsSearchVisible((v) => !v)}
+          onDownloadButtonClick={onDownload}
+          onCopyButtonClick={onCopy}
+          isSearchVisible={isSearchVisible}
+          onChangeSearch={(event: { target: { value: string; }; }) => setSearch(event.target.value as string)}
+          onCloseButtonClick={() => { setIsSearchVisible(false); setSearch(''); }}
+          searchValue={search}
+        >
+          {(codeWrap) => (
+            <JsonCodeEditor
+              value={search ? filteredDisplay : raw}
+              onChange={handleFilteredEdit}
+              readOnly={false}
+              isValid={isValid}
+              textareaId="tenant-context-json-editor"
+              codeWrap={codeWrap}
+            />
+          )}
+        </PanelCodeEditorContainer>
+      </PanelContainer>
+    </div>
   );
 };

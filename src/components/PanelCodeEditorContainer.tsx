@@ -78,7 +78,7 @@ const PanelCodeEditorContainer: React.FC<PanelCodeEditorContainerProps> = ({
             className="uci-flex-1 !uci-bg-[#111111] !uci-text-white !uci-border-[#383838] !uci-border-solid !uci-border-[1px] !uci-rounded !uci-h-10 !uci-text-sm focus-within:!uci-border-[#99A7F1] focus-within:!uci-ring-0 [&_input]:!uci-text-white [&_input]:!uci-text-sm [&_input]:!uci-py-0 [&_input]:!uci-px-4 [&_input]:!uci-h-full [&_input]:!uci-flex [&_input]:!uci-items-center [&_input::placeholder]:!uci-text-gray-400"
           />
           <IconButton
-            classNames="!uci-border-[#383838] !uci-border-solid !uci-border-[1px] uci-rounded uci-p-[8px] uci-bg-[#111111]"
+            classNames="!uci-border-[#383838] !uci-border-solid !uci-border-[1px] uci-rounded uci-p-[8px] uci-bg-[#111111] uci-w-[40px] uci-h-[40px] uci-flex uci-items-center uci-justify-center"
             label="Close search"
             onClick={onCloseButtonClick}
           >

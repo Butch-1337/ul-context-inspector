@@ -345,7 +345,12 @@ const SelectContent = ({
   };
 
   return (
-    <PopoverContent className={cn("uci-w-[var(--trigger-width)] uci-p-1 uci-outline-none !uci-overflow-visible", className)}>
+    <PopoverContent 
+      side="bottom" 
+      align="start" 
+      sideOffset={0}
+      className={cn("uci-w-[var(--trigger-width)] uci-p-1 uci-outline-none !uci-overflow-visible", className)}
+    >
       <div
         ref={contentRef}
         data-slot="select-content"
