@@ -27,7 +27,7 @@ export const JsonCodeEditor: React.FC<JsonCodeEditorProps> = ({
   const lineCount = useMemo(() => value.split('\n').length, [value]);
   return (
     <div
-      className={`uci-flex uci-min-h-full uci-h-fit uci-w-full uci-rounded uci-border ${
+      className={`uci-flex uci-min-h-full uci-h-fit uci-w-full uci-rounded uci-border uci-border-solid ${
         isValid ? 'uci-border-gray-700' : 'uci-border-red-500'
       } uci-bg-[#171717] uci-rounded-b-lg`}
     >
