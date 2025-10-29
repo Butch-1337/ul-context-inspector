@@ -50,7 +50,7 @@ export const DevApp: React.FC = () => {
             Universal Login Context Inspector
           </h1>
           <p className="uci-text-[#ABABAB]">
-            Dev Sandbox: Edit <InlineCode sx={{backgroundColor: "#b7b2ff"}}>window.universal_login_context</InlineCode> JSON via the left
+            Dev Sandbox: Edit <InlineCode className="uci-bg-[#b7b2ff]">window.universal_login_context</InlineCode> JSON via the left
             panel.
           </p>
         </div>
