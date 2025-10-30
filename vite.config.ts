@@ -18,6 +18,8 @@ export default defineConfig({
       copyDtsFiles: true
     })
   ],
+  // Disable copying of the public/ folder for library distribution
+  publicDir: false,
   build: {
   sourcemap: true,
   cssCodeSplit: false, // ship a single CSS bundle for library consumers

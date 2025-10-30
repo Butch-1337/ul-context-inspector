@@ -212,72 +212,80 @@ export const UniversalLoginContextPanel: React.FC<
 
   const [disableDataSourceSelect, setdisableDataSourceSelect] = useState(false);
   // Early local manifest detection (runs once). Prefer local dev if a local manifest exists and no prior session choice.
-    useEffect(() => {
-      let cancelled = false;
-      (async () => {
-        // Single attempt to fetch local manifest; any failure disables local selection.
-        const fetchManifest = async (): Promise<UlManifest | null> => {
-          try {
-            const res = await fetch("/manifest.json", { cache: "no-store" });
-            if (!res.ok) {
-              setdisableDataSourceSelect(true);
-              return null;
-            }
-            return (await res.json()) as UlManifest;
-          } catch {
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      // Single attempt to fetch local manifest; any failure disables local selection.
+      const fetchManifest = async (): Promise<UlManifest | null> => {
+        try {
+          const res = await fetch("/manifest.json", { cache: "no-store" });
+          if (!res.ok) {
             setdisableDataSourceSelect(true);
             return null;
           }
-        };
-
-        const existing = getSessionValue(SESSION_KEYS.dataSource);
-        if (existing || isConnected) {
-          // Still probe once to decide if selector should be disabled.
-          await fetchManifest();
-          setInitReady(true);
-          return;
+          return (await res.json()) as UlManifest;
+        } catch {
+          setdisableDataSourceSelect(true);
+          return null;
         }
+      };
 
-        const manifestJson = await fetchManifest();
-        if (cancelled) return;
-        if (!manifestJson) {
-          // No local manifest available; initialization still completes.
-          setInitReady(true);
-          return;
-        }
-        if (Array.isArray(manifestJson.screens)) {
-          setLocalManifestData(manifestJson);
-          // Efficient first local screen discovery.
-          const firstLocal = (() => {
-            for (const entry of manifestJson.screens) {
-              for (const [top, children] of Object.entries(entry)) {
-                if (children && typeof children === "object") {
-                  const firstChild = Object.keys(children)[0];
-                  if (firstChild) return `${top}:${firstChild}`;
-                }
+      const existing = getSessionValue(SESSION_KEYS.dataSource);
+      if (existing || isConnected) {
+        // Still probe once to decide if selector should be disabled.
+        await fetchManifest();
+        setInitReady(true);
+        return;
+      }
+
+      const manifestJson = await fetchManifest();
+      if (cancelled) return;
+      if (!manifestJson) {
+        // No local manifest available; initialization still completes.
+        setInitReady(true);
+        return;
+      }
+      if (Array.isArray(manifestJson.screens)) {
+        setLocalManifestData(manifestJson);
+        // Efficient first local screen discovery.
+        const firstLocal = (() => {
+          for (const entry of manifestJson.screens) {
+            for (const [top, children] of Object.entries(entry)) {
+              if (children && typeof children === "object") {
+                const firstChild = Object.keys(children)[0];
+                if (firstChild) return `${top}:${firstChild}`;
               }
             }
-            return undefined;
-          })();
-          const defaultValid = !!defaultScreen && (() => {
+          }
+          return undefined;
+        })();
+        const defaultValid =
+          !!defaultScreen &&
+          (() => {
             const [dTop, dChild] = defaultScreen.split(":");
-              const container = (manifestJson.screens.find(e => e[dTop]) || {})[dTop] as Record<string, unknown> | undefined;
-              return !!(container && typeof container === 'object' && (container as Record<string, unknown>)[dChild]);
+            const container = (manifestJson.screens.find((e) => e[dTop]) || {})[
+              dTop
+            ] as Record<string, unknown> | undefined;
+            return !!(
+              container &&
+              typeof container === "object" &&
+              (container as Record<string, unknown>)[dChild]
+            );
           })();
-          const target = defaultValid ? defaultScreen! : firstLocal;
-          if (target && target !== selectedScreen) {
-            setSelectedScreen(prev => prev || target);
-          }
-          if (dataSource !== "Local development") {
-            setDataSource("Local development");
-          }
+        const target = defaultValid ? defaultScreen! : firstLocal;
+        if (target && target !== selectedScreen) {
+          setSelectedScreen((prev) => prev || target);
         }
-        if (!cancelled) setInitReady(true);
-      })();
-      return () => {
-        cancelled = true;
-      };
-    }, []); // run once
+        if (dataSource !== "Local development") {
+          setDataSource("Local development");
+        }
+      }
+      if (!cancelled) setInitReady(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []); // run once
 
   // Derive variant options from manifest (fallback to provided variants prop).
   const variantOptions = useMemo(() => {
@@ -360,6 +368,8 @@ export const UniversalLoginContextPanel: React.FC<
   }, [selectedScreen, localManifestData, dataSources, screenExistsLocally]);
 
   // Auto-select latest version when manifest loads
+  console.log("here i am");
+
   useEffect(() => {
     if (
       manifest?.versions &&
@@ -475,7 +485,6 @@ export const UniversalLoginContextPanel: React.FC<
       /* ignore */
     }
   }, [raw]);
-
   const onDownload = useCallback(() => {
     try {
       const screenPart = (selectedScreen || "screen").replace(/:/g, "-");
@@ -511,7 +520,6 @@ export const UniversalLoginContextPanel: React.FC<
         matchedLines.push(line);
       }
     });
-
     return {
       filteredDisplay: matchedLines.join("\n"),
       filteredLineIndices: matchedIndices

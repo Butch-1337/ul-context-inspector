@@ -28,7 +28,6 @@ const PanelSelectContext: React.FC<PanelSelectContextProps> = ({
     ?.toLowerCase()
     .includes("local");
 
-  console.log({ disableDataSourceSelect });
   return (
     <div className="uci-flex uci-flex-col">
       <SelectField
