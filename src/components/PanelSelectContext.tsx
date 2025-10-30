@@ -25,16 +25,18 @@ const PanelSelectContext: React.FC<PanelSelectContextProps> = ({
 
   const isLocalDevelopment = selectedDataSource?.toLowerCase().includes('local');
 
+
   return (
-    <div className="uci-flex uci-flex-col">
+  <div className="uci-flex uci-flex-col">
       <SelectField
         name="panel-select-screen"
-        options={screenOptions}
+    options={screenOptions}
         prefix="Screen"
         value={selectedScreen}
         placeholder={selectedScreen}
         onChange={onChangeSelectScreen}
-        disabled={screenOptions?.length <= 1}
+    disabled={screenOptions?.length <= 1}
+    searchable
       />
 
       {!isConnected && (

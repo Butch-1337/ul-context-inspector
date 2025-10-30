@@ -25,28 +25,6 @@ import type {
   WindowLike
 } from "../types/universal-login-context-panel";
 
-/**
- * UniversalLoginContextPanel
- * -------------------------------------------------------------
- * Primary developer tool surface for inspecting / editing a JSON blob
- * exposed as `window.universal_login_context` (or overridden via `root`).
- *
- * Two conceptual modes:
- * 1. Connected: A context object already existed at mount. Edits persist
- *    (debounced) back to the global object.
- * 2. Disconnected Preview: No context existed initially. A manifest can be
- *    loaded (local or CDN) to preview screen + variant JSON. This does NOT
- *    mutate global state unless the data source is explicitly Local (opt‑in
- *    promotion) or a future explicit action is added.
- *
- * Key design choices:
- * - "Connected" status is sticky based solely on initial presence; we avoid
- *   accidentally declaring connection after loading a preview.
- * - Manifest logic is encapsulated in `useUlManifest` to keep this component
- *   focused on orchestration & presentation.
- * - JSON state management & debounced write handled by `useWindowJsonContext`.
- */
-
 export const UniversalLoginContextPanel: React.FC<
   UniversalLoginContextPanelProps
 > = ({ defaultScreen }) => {
