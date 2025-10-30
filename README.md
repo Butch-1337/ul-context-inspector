@@ -31,12 +31,12 @@ import {
 import { getScreenComponent } from '@/utils/screen/screenLoader';
 
 const App = () => {
-  const context = useUniversalLoginContextSubscription();
+  const context = useUniversalLoginContextSubscription(); // Subscribe to context which will determine the screen and rehydrate props with new state
   const screenName = context?.screen?.name;
   const ScreenComponent = screenName ? getScreenComponent(screenName) : null;
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <UniversalLoginContextPanel defaultScreen="login-password:login-password" />
+      <UniversalLoginContextPanel defaultScreen="login-password:login-password" /> // Add comment for component
       {ScreenComponent ? <ScreenComponent key={screenName} /> : <div>Select a screen...</div>}
     </Suspense>
   );
