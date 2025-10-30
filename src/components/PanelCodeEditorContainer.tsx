@@ -30,7 +30,7 @@ const PanelCodeEditorContainer: React.FC<PanelCodeEditorContainerProps> = ({
     <div className="uci-code-editor-container uci-editor-custom-styles">
       <div className="uci-code-editor-toolbar">
         <div className="uci-code-editor-toolbar-toggles uci-flex uci-items-center uci-gap-2">
-          <div className="uci-flex uci-items-center uci-px-2 uci-rounded uci-h-5 uci-bg-[#666] uci-text-[11px] uci-uppercase uci-tracking-wide uci-font-semibold">
+          <div className="uci-flex uci-items-center uci-px-2  uci-text-[11px] uci-uppercase uci-tracking-wide uci-font-semibold uci-text-[#C5C5C5]">
             Read Only
           </div>
           <div className="uci-flex uci-items-center uci-gap-[2px]">

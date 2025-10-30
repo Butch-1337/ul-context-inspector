@@ -70,7 +70,16 @@ export const UniversalLoginContextPanel: React.FC<
 
   const [selectedScreen, setSelectedScreen] = useState<string | undefined>(
     () => {
-      return getSessionValue(SESSION_KEYS.screen) || defaultScreen;
+  const sessionVal = getSessionValue(SESSION_KEYS.screen);
+  // Only use defaultScreen if no prior session value exists.
+      if (sessionVal) return sessionVal;
+      // If no defaultScreen provided and we're in CDN mode on first load, prefer 'login-id:login-id'.
+      const initialDataSource =
+        getSessionValue(SESSION_KEYS.dataSource) || defaultDataSource;
+      if (!defaultScreen && initialDataSource === "Auth0 CDN") {
+        return "login-id:login-id";
+      }
+      return defaultScreen;
     }
   );
   const [variant, setVariant] = useState(() => {
@@ -78,12 +87,11 @@ export const UniversalLoginContextPanel: React.FC<
       getSessionValue(SESSION_KEYS.variant) || defaultVariant || variants[0]
     );
   });
-  const [dataSource, setDataSource] = useState(() => {
-    return (
-      getSessionValue(SESSION_KEYS.dataSource) ||
-      defaultDataSource ||
-      dataSources[0]
-    );
+  const [dataSource, setDataSource] = useState<string>(() => {
+    const sessionVal = getSessionValue(SESSION_KEYS.dataSource);
+    if (sessionVal) return sessionVal;
+    // Placeholder initial; may be overridden by early local manifest check effect below.
+    return defaultDataSource || dataSources[0];
   });
   const [version, setVersion] = useState(() => {
     return (
@@ -93,10 +101,13 @@ export const UniversalLoginContextPanel: React.FC<
   const [localManifestData, setLocalManifestData] = useState<UlManifest | null>(
     null
   );
+  // Initialization gate so we can attempt local manifest detection before enabling manifest fetch/persistence.
+  const [initReady, setInitReady] = useState(false);
   // Tracks if the user has manually edited the JSON buffer while disconnected.
   // If true we avoid clobbering their edits when selection changes trigger
   // manifest fetches. Selecting a new variant/data source/version resets it.
   const [userEdited, setUserEdited] = useState(false);
+
 
   const { raw, setRaw, isValid, contextObj } = useWindowJsonContext({
     root,
@@ -161,7 +172,7 @@ export const UniversalLoginContextPanel: React.FC<
     root: root as Record<string, unknown>,
     dataSource,
     version,
-    enabled: open && !isConnected
+    enabled: open && !isConnected && initReady // wait until local detection completes
   });
 
   // Auto-select logic once manifest screen options arrive.
@@ -184,44 +195,79 @@ export const UniversalLoginContextPanel: React.FC<
     }
   }, [screenOptions, selectedScreen]);
 
-  // Persist selections to sessionStorage (single effect)
+  // Persist selections only after initialization to avoid writing CDN prematurely.
   useEffect(() => {
+    if (!initReady) return;
     if (typeof window === "undefined") return;
     try {
-      if (selectedScreen)
-        sessionStorage.setItem(SESSION_KEYS.screen, selectedScreen);
+      if (selectedScreen) sessionStorage.setItem(SESSION_KEYS.screen, selectedScreen);
       if (variant) sessionStorage.setItem(SESSION_KEYS.variant, variant);
-      if (dataSource)
-        sessionStorage.setItem(SESSION_KEYS.dataSource, dataSource);
+      if (dataSource) sessionStorage.setItem(SESSION_KEYS.dataSource, dataSource);
       if (version) sessionStorage.setItem(SESSION_KEYS.version, version);
-    } catch {
-      /* ignore */
-    }
-  }, [selectedScreen, variant, dataSource, version]);
+    } catch { /* ignore */ }
+  }, [selectedScreen, variant, dataSource, version, initReady]);
 
-  // Fetch local manifest to check if current screen exists locally
+  // Early local manifest detection (runs once). Prefer local dev if a local manifest exists and no prior session choice.
   useEffect(() => {
-    if (!open || isConnected) return;
-
     let cancelled = false;
-
     (async () => {
+      // Respect any existing session-stored dataSource (user already chose).
+      const existing = getSessionValue(SESSION_KEYS.dataSource);
+      if (existing) {
+        setInitReady(true);
+        return;
+      }
+      // If we're connected to a tenant context, skip auto-promotion.
+      if (isConnected) {
+        setInitReady(true);
+        return;
+      }
       try {
-        const res = await fetch("/manifest.json", { cache: "no-store" });
-        if (res.ok && !cancelled) {
-          const data = await res.json();
-          setLocalManifestData(data);
+        const res = await fetch('/manifest.json', { cache: 'no-store' });
+        if (!res.ok) {
+          // No local manifest: proceed with CDN.
+          setInitReady(true);
+          return;
+        }
+        const manifestJson: UlManifest = await res.json();
+        if (cancelled) return;
+        if (manifestJson && Array.isArray(manifestJson.screens)) {
+          setLocalManifestData(manifestJson);
+          // Pick screen: valid defaultScreen or first manifest screen.
+          let firstLocal: string | undefined;
+          for (const entry of manifestJson.screens) {
+            for (const topKey of Object.keys(entry)) {
+              const container = entry[topKey];
+              if (container && typeof container === 'object') {
+                for (const childKey of Object.keys(container)) {
+                  firstLocal = `${topKey}:${childKey}`;
+                  break;
+                }
+              }
+              if (firstLocal) break;
+            }
+            if (firstLocal) break;
+          }
+          const defaultValid = defaultScreen ? (() => {
+            const [dTop, dChild] = defaultScreen.split(':');
+            return manifestJson.screens.some(e => e[dTop]?.[dChild]);
+          })() : false;
+          const target = defaultValid ? defaultScreen! : firstLocal;
+          // Set selected screen only if not already set (preserve connected context value).
+          if (target) setSelectedScreen(prev => prev || target);
+          // Switch data source to Local development if needed.
+          if (dataSource !== 'Local development') setDataSource('Local development');
         }
       } catch {
-        // If local manifest doesn't exist or fails to load, that's fine
-        if (!cancelled) setLocalManifestData(null);
+        // On error: fall back to CDN.
+      } finally {
+        // Initialization complete.
+        if (!cancelled) setInitReady(true);
       }
     })();
+    return () => { cancelled = true; };
+  }, []); // run once
 
-    return () => {
-      cancelled = true;
-    };
-  }, [open, isConnected]);
 
   // Derive variant options from manifest (fallback to provided variants prop).
   const variantOptions = useMemo(() => {
@@ -478,6 +524,11 @@ export const UniversalLoginContextPanel: React.FC<
         />
       </div>
     );
+  }
+
+  // Avoid flashing CDN before local detection completes.
+  if (!initReady) {
+    return <div className="uci-context-inspector-root" />;
   }
 
   return (
