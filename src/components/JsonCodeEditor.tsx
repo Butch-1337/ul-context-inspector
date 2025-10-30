@@ -29,7 +29,7 @@ export const JsonCodeEditor: React.FC<JsonCodeEditorProps> = ({
     <div
       className={`uci-flex uci-min-h-full uci-h-fit uci-w-full uci-rounded uci-border uci-border-solid ${
         isValid ? 'uci-border-gray-700' : 'uci-border-red-500'
-      } uci-bg-[#171717] uci-rounded-b-lg`}
+  } uci-bg-[#171717] uci-rounded-b-lg ${readOnly ? 'uci-code-editor-readonly' : ''}`}
     >
       {/* editor line digits */}
       <div className="uci-code-editor-digits uci-select-none uci-bg-[#171717] uci-text-gray-500 uci-text-[11px] uci-leading-4 uci-font-mono
@@ -51,6 +51,8 @@ export const JsonCodeEditor: React.FC<JsonCodeEditorProps> = ({
         style={{
           outline: 'none',
           minHeight: '100%',
+          caretColor: readOnly ? 'transparent' : undefined,
+          cursor: readOnly ? 'default' : 'text'
         }}
       />
     </div>
