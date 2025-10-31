@@ -1,7 +1,7 @@
 {
   "name": "ul-context-inspector",
   "version": "0.1.0",
-  "description": "React UI component to inspect context data exposed on the window object.",
+  "description": "Universal Login Inspector tool to inspect Auth0 ACUL context data.",
   "author": "",
   "license": "ISC",
   "type": "module",
