@@ -66,5 +66,5 @@ Tailwind prefix: `uci-` (safelist with `/uci-/`).
 
 ## 📜 License
 
-MIT
+ISC
 
