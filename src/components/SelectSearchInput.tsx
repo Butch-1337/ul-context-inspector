@@ -31,7 +31,7 @@ export const ScreenSelectSearch: React.FC<ScreenSelectSearchProps> = ({
           placeholder="Search by screen name..."
           onKeyDown={(e) => e.stopPropagation()}
           data-slot="select-search"
-          className="uci-w-full uci-text-[14px] uci-bg-[#111111] uci-border uci-border-[#383838] uci-rounded uci-pl-7 uci-pr-2 uci-py-2 uci-text-[#C5C5C5] placeholder:uci-text-[#666] focus:uci-outline-[#555]"
+          className="uci-w-full uci-text-[14px] uci-bg-[#111111] uci-border uci-border-solid uci-border-[#383838] uci-rounded uci-pl-7 uci-pr-2 uci-py-2 uci-text-[#C5C5C5] placeholder:uci-text-[#666] focus:uci-outline-none focus:uci-border-[#808080]"
         />
       </div>
     </div>
