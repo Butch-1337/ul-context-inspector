@@ -65,18 +65,6 @@ const PanelSelectContext: React.FC<PanelSelectContextProps> = ({
                 disableDataSourceSelect || dataSourceOptions?.length <= 1
               }
             />
-
-            {!isLocalDevelopment && (
-              <SelectField
-                name="panel-select-data-version"
-                prefix="Data version"
-                options={dataVersionOptions}
-                value={selectedDataVersion}
-                onChange={onChangeSelectDataVersion}
-                placeholder={selectedDataVersion}
-                disabled={dataVersionOptions?.length <= 1}
-              />
-            )}
           </div>
         </div>
       )}

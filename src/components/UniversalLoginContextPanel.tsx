@@ -295,10 +295,11 @@ export const UniversalLoginContextPanel: React.FC<
     return info ? info.variants : variants;
   }, [selectedScreen, getVariantInfo, variants, manifest]);
 
-
   // Derive version options from manifest (fallback to provided versions prop).
   const versionOptions = useMemo(() => {
-    const allVersions = manifest?.versions?.length ? manifest.versions : versions;
+    const allVersions = manifest?.versions?.length
+      ? manifest.versions
+      : versions;
     const sortedVersions = sortDescVersions(allVersions);
     if (sortedVersions.length) {
       sortedVersions[0] = `${sortedVersions[0]} (latest)`;
@@ -308,7 +309,9 @@ export const UniversalLoginContextPanel: React.FC<
 
   // Get the display version with "(latest)" suffix if applicable
   const displayVersion = useMemo(() => {
-    const rawVersions = manifest?.versions?.length ? manifest.versions : versions;
+    const rawVersions = manifest?.versions?.length
+      ? manifest.versions
+      : versions;
     const sortedVersions = sortDescVersions(rawVersions);
     if (sortedVersions.length && version === sortedVersions[0]) {
       return `${version} (latest)`;
@@ -353,12 +356,14 @@ export const UniversalLoginContextPanel: React.FC<
     }
   }, [dataSource, manifest, version, sortDescVersions]);
 
-  // Ensure selected variant remains valid when options change.
+  // Ensure selected variant remains valid when options change, but only after manifest is loaded.
   useEffect(() => {
+    // Defer validation until manifest fetched to avoid clobbering a persisted variant before options populate.
+    if (!manifest) return;
     if (variant && !variantOptions.includes(variant)) {
       setVariant(variantOptions[0]);
     }
-  }, [variantOptions, variant]);
+  }, [manifest, variantOptions, variant]);
 
   // Ensure data source remains valid after filtering (e.g., local removed)
   useEffect(() => {
@@ -408,20 +413,42 @@ export const UniversalLoginContextPanel: React.FC<
   const handleVariant = useCallback((v: string) => {
     setVariant(v);
     setUserEdited(false);
-    if (typeof window !== "undefined") window.location.reload();
+    // Persist immediately so if a reload happens elsewhere we keep selection.
+    if (typeof window !== "undefined") {
+      try {
+        sessionStorage.setItem(SESSION_KEYS.variant, v);
+      } catch {
+        /* ignore */
+      }
+      window.location.reload();
+    }
   }, []);
 
   const handleDataSource = useCallback((v: string) => {
     setDataSource(v);
     setUserEdited(false);
-    if (typeof window !== "undefined") window.location.reload();
+    if (typeof window !== "undefined") {
+      try {
+        sessionStorage.setItem(SESSION_KEYS.dataSource, v);
+      } catch {
+        /* ignore */
+      }
+    }
+    window.location.reload();
   }, []);
 
   const handleVersion = useCallback((v: string) => {
     const cleanVersion = v.replace(/ \(latest\)$/, "");
     setVersion(cleanVersion);
     setUserEdited(false);
-    if (typeof window !== "undefined") window.location.reload();
+    if (typeof window !== "undefined") {
+      try {
+        sessionStorage.setItem(SESSION_KEYS.version, cleanVersion);
+      } catch {
+        /* ignore */
+      }
+      window.location.reload();
+    }
   }, []);
 
   // (Manifest fetch handled by useUlManifest)
@@ -546,8 +573,26 @@ export const UniversalLoginContextPanel: React.FC<
             }
             onChangeSelectScreen={(event) => {
               if (!isConnected) {
-                setSelectedScreen(event.target.value as string);
-                if (typeof window !== "undefined") window.location.reload();
+                const value = event.target.value as string;
+                setSelectedScreen(value);
+                if (typeof window !== "undefined") {
+                  try {
+                    sessionStorage.setItem(SESSION_KEYS.screen, value);
+                  } catch {
+                    /* ignore */
+                  }
+                  window.location.reload();
+                }
+                // Reset variant baseline by clearing stored variant if it no longer applies.
+                if (variant && !variantOptions.includes(variant)) {
+                  const next = variantOptions[0];
+                  setVariant(next);
+                  try {
+                    sessionStorage.setItem(SESSION_KEYS.variant, next);
+                  } catch {
+                    /* ignore */
+                  }
+                }
               }
             }}
             onChangeSelectVariant={(event) =>
