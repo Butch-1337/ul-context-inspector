@@ -433,7 +433,7 @@ export const UniversalLoginContextPanel: React.FC<
   }, [raw, variant, selectedScreen]);
 
   // Line-level filtering for search - tracks line indices for editable filtered view
-  const { filteredDisplay, filteredLineIndices } = useMemo(() => {
+  const { filteredDisplay } = useMemo(() => {
     if (!search) return { filteredDisplay: raw, filteredLineIndices: null };
     const lower = search.toLowerCase();
     const lines = raw.split("\n");
