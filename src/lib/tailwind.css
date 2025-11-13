@@ -1,0 +1,25 @@
+/* Do NOT include @tailwind base - it creates global styles */
+@tailwind components;
+@tailwind utilities;
+
+/* Scoped utilities for the component */
+@layer utilities {
+  .uci-context-inspector-root .uci-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .uci-context-inspector-root .uci-scrollbar::-webkit-scrollbar-track {
+    background: hsl(var(--uci-background));
+  }
+  
+  .uci-context-inspector-root .uci-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--uci-muted));
+    border-radius: 4px;
+  }
+  
+  .uci-context-inspector-root .uci-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--uci-muted-foreground));
+  }
+}
+

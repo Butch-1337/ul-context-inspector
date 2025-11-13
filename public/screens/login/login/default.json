@@ -1,0 +1,39 @@
+{
+  "branding": {
+    "settings": {
+      "font": {
+        "url": "https://junior-word.com"
+      }
+    }
+  },
+  "client": {
+    "id": "jAn8Pnux9dkf8U7DebyrMhde",
+    "name": "Hagenes, Runte and Gleichner"
+  },
+  "organization": {
+    "id": "org_SOzFEX4jIuGtY5VQcAJrcuNq",
+    "name": "hegmann-llc",
+    "usage": "allow"
+  },
+  "prompt": {
+    "name": "login"
+  },
+  "screen": {
+    "links": {
+      "reset_password": "https://nimble-wombat.net",
+      "signup": "https://international-transom.com/"
+    },
+    "name": "login"
+  },
+  "tenant": {
+    "name": "stanton-inc"
+  },
+  "transaction": {
+    "locale": "en",
+    "state": "LJ47LrwjYHjCx9tBWqOCdkweUFzYmFQ5",
+    "ip_address": "192.168.1.45",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "session_id": "sess_9f8e7d6c5b4a3e2d1c9b8a7f6e5d4c3b2a1",
+    "timestamp": "2025-09-25T14:30:22.123Z"
+  }
+}

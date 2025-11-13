@@ -1,0 +1,19 @@
+{
+  "style": "default",
+  "rsc": false,
+  "tsx": true,
+  "tailwind": {
+    "config": "tailwind.config.cjs",
+    "css": "src/lib/tailwind.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": "uci-"
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils"
+  },
+  "registries": {
+    "@universal-components": "https://universal-design-docs.vercel.app/api/registry/ui/{name}/default"
+  }
+}
