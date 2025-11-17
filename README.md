@@ -6,13 +6,12 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/@auth0/ul-context-inspector"><img alt="npm" src="https://img.shields.io/npm/v/@auth0/ul-context-inspector" /></a>
   <a href="https://www.npmjs.com/package/@auth0/ul-context-inspector"><img alt="downloads" src="https://img.shields.io/npm/dm/@auth0/ul-context-inspector" /></a>
-  <a href="https://bundlephobia.com/package/@auth0/ul-context-inspector"><img alt="bundle size" src="https://img.shields.io/bundlephobia/minzip/@auth0/ul-context-inspector" /></a>
   <img alt="react versions" src="https://img.shields.io/badge/react-18%20|%2019-61dafb?logo=react" />
   <img alt="node" src="https://img.shields.io/badge/node-%3E=20.19.0-43853d?logo=node.js" />
   <img alt="typescript" src="https://img.shields.io/badge/TypeScript-ready-3178c6?logo=typescript" />
   <img alt="license" src="https://img.shields.io/badge/license-Apache--2.0-blue" />
   <img alt="vite" src="https://img.shields.io/badge/Built%20with-Vite-646cff?logo=vite" />
-  <img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen" />
+
 </p>
 
 
@@ -79,8 +78,7 @@ public/
         "login-id": { "path": "/screens/login-id/login-id", "variants": ["default", "with-errors"] }
       }
     }
-  ],
-  "versions": ["0"]
+  ]
 }
 ```
 
