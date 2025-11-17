@@ -115,7 +115,6 @@ function Host() {
 }
 ```
 
-Internally a `CustomEvent('universal-login-context:updated')` is dispatched whenever edits apply.
 
 ## �🕹 5. Interactive Behavior
 
