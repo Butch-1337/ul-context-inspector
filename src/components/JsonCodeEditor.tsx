@@ -4,6 +4,33 @@ import "prismjs/components/prism-clike";
 import "prismjs/components/prism-javascript";
 import "prismjs/components/prism-json";
 
+// Prism token type definition
+interface PrismToken {
+  type: string;
+  content: string | PrismToken | (string | PrismToken)[];
+  alias?: string | string[];
+}
+
+// Recursively render Prism tokens as React elements
+const renderTokens = (tokens: (string | PrismToken)[], keyPrefix = ""): React.ReactNode => {
+  return tokens.map((token, index) => {
+    const key = `${keyPrefix}-${index}`;
+    if (typeof token === "string") {
+      return <span key={key}>{token}</span>;
+    }
+    const content = Array.isArray(token.content)
+      ? renderTokens(token.content as (string | PrismToken)[], key)
+      : typeof token.content === "object"
+        ? renderTokens([token.content] as (string | PrismToken)[], key)
+        : token.content;
+    return (
+      <span key={key} className={`token ${token.type}`}>
+        {content}
+      </span>
+    );
+  });
+};
+
 // Lightweight JSON editor wrapper with Prism highlighting and a fixed line number gutter.
 export interface JsonCodeEditorProps {
   value: string;
@@ -18,8 +45,13 @@ export const JsonCodeEditor: React.FC<JsonCodeEditorProps> = ({
   isValid = true,
   codeWrap = false
 }) => {
-  // Split into lines for rendering line numbers alongside content
-  const lines = useMemo(() => value.split("\n"), [value]);
+  // Split into lines and tokenize each for rendering
+  const lines = useMemo(() => {
+    return value.split("\n").map((line) => {
+      const tokens = Prism.tokenize(line || " ", Prism.languages.json);
+      return tokens;
+    });
+  }, [value]);
   
   return (
     <div
@@ -47,10 +79,9 @@ export const JsonCodeEditor: React.FC<JsonCodeEditorProps> = ({
               className={`uci-m-0 uci-flex-1 uci-text-gray-100 uci-pr-2 ${
                 codeWrap ? "uci-whitespace-pre-wrap uci-break-all" : "uci-whitespace-pre"
               }`}
-              dangerouslySetInnerHTML={{
-                __html: Prism.highlight(line || " ", Prism.languages.json, "json")
-              }}
-            />
+            >
+              {renderTokens(line as (string | PrismToken)[], `line-${i}`)}
+            </pre>
           </div>
         ))}
       </div>
